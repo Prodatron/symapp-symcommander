@@ -1,0 +1,222 @@
+<title>SymCommander help</title>
+
+<h1>1000-Introduction</h1>
+<br>
+<b>INTRODUCTION TO SYMCOMMANDER</b><br>
+<br>
+SymCommander is a file manager for SymbOS, a program in the style of the classic <b>Norton Commander</b> to copy, move or delete files. SymCommander can do much more like surfing through directory trees, displaying detailed file and drive information, changing file attributes, split and combine files etc.<br>
+<br>
+SymCommander can be controlled by <b>mouse</b> as well as by <b>keyboard</b>. There are <u 2300>keyboard shortcuts</u> for all important operations, which speeds up the usage of SymCommander a lot.<br>
+
+<h2>1100-Feature overview</h2>
+<br>
+<b>FEATURES</b><br>
+<br>
+- blabla<br>
+- blabla<br>
+- blabla<br>
+- blabla<br>
+<br>
+
+<h2>1200-What's new?</h2>
+<br>
+<b>WHAT'S NEW?</b><br>
+<br>
+<b>V1.1 (2015-01-01)</b><br>
+<br>
+- blabla<br>
+- blabla<br>
+- blabla<br>
+- blabla<br>
+<br>
+<b>V1.0 (2005-01-01)</b><br>
+<br>
+- blabla<br>
+- blabla<br>
+- blabla<br>
+- blabla<br>
+<br>
+
+<h1>2000-Using SymCommander</h2>
+
+<h2>2100-Screen Layout</h2>
+<br>
+<b>SCREEN LAYOUT</b><br>
+<br>
+SymCommanders screen mainly contains two large directory lists on the left and the right side. Each shows the folder content of a selected drive and path, which are shown above the list. The path of the active list is displayed inverted. This is also the source directory for file operations, the non-active list is always the destination directory. At the bottom of each list you will see a summary of the number and total sizes of all and the selected files and directories.<br>
+<br>
+At the bottom of the screen you will find a textinput line for entering commands directly like in a text shell. Next to it there are the buttons for some of the most important file operations. Like many SymbOS applications SymCommander contains a menubar at the top of the window, were you find all available functions.<br>
+<br>
+
+<h2>2200-Pull Down Menus</h2>
+
+<h3>2210-Files</h2>
+<br>
+<b>"FILES" MENU</b><br>
+<br>
+<b>>Open</b><br>
+<br>
+Opens or executes the selected file. If you typed something into the commandline the system will try to start this file including all attached parameters. Otherwise it will load the one selected in the current list. EXE and COM files will be executed directly, while documents will be loaded with their associated application.<br>
+<br>
+<b>>Change Attributes</b><br>
+<br>
+This opens a dialogue, which allows you to set or reset any attributes of one or multiple selected files and directories at the same time in just one step. You can also change their timestamps. Choose "unchng" for any attribute types if you want to leave them unchanged.<br>
+<br>
+<b>>Properties</b><br>
+<br>
+In this dialogue you will receive several information about on single selected file or directory, like its date and its side. It also allows you to rename it and modify its attributes.<br>
+<br>
+<b>>Drive Information</b><br>
+<br>
+Displays all data of the current disc drive or harddisc partition. This included the drive and filesystem as well as the total amount of free and used space.<br>
+<br>
+<b>>Split File</b><br>
+<br>
+If you want to split one large file into an amount of smaller files (which may fit on a floppydisc then) you can use this function. You have to specify the size and the destination.<br>
+<br>
+<b>>Combine Files</b><br>
+<br>
+To unite any amount of split files into one large file again you have to use this function. It will copy all selected files into one big file again.<br>
+<br>
+
+<h3>2220-Mark</h2>
+<br>
+<b>"MARK" MENU</b><br>
+<br>
+The mark menu is for quick selecting of an amount of files and directories inside the current list. You can then do any operations on the selected files (see <u 2210>FILE</u> or <u 2230>COMMANDS</u> menu).<br><br>
+<br>
+<b>>Select Group</b><br>
+<br>
+This allows the selection of all files with a name and/or extension, which are matching to a specified file mask. Allowed wildcards are <b>?</b> (any single char) and <b>*</b> (any chars until the end of the name section).<br>
+<br>
+<b>>Unselect Group</b><br>
+<br>
+This is working in the same way like "Select Group" but it will unselect all matching files.<br>
+<br>
+<b>>(Un)Select All</b><br>
+<br>
+Selects or unselects all files and directories in the current list.<br>
+<br>
+<b>>Invert Selection</b><br>
+<br>
+Inverts the current file and directory selection. All selected items will be unselected and all unselected will be selected.<br>
+<br>
+<b>>Compare Directories</b><br>
+<br>
+<i>[this feature is not yet implemented]</i><br>
+<br>
+
+<h3>2230-Commands</h2>
+<br>
+<b>"COMMANDS" MENU</b><br>
+<br>
+<b>>Copy Files</b><br>
+<br>
+Copies all selected files to the destination drive and directory. Already existing files at the destination can be optionally overwritten or skipped.<br>
+<i>[recursive subdirectory handling is currently not supported]</i><br>
+<br>
+<b>>Move Files</b><br>
+<br>
+Renames or moves files. If no file is marked, the current selected file is renamed. If one or more files are marked they will be moved to the destination directory.<br>
+<i>[recursive subdirectory handling is currently not supported]</i><br>
+<br>
+<b>>Delete Files</b><br>
+<br>
+Deletes all selected files.<br>
+<br>
+<b>>New Folder</b><br>
+<br>
+Creates a new subfolder inside the current directory.<br>
+<br>
+<b>>View/Edit/Search</b><br>
+<br>
+<i>[these features are not yet implemented]</i><br>
+<br>
+<b>>Source &lt;-> Target</b><br>
+<br>
+Swaps the path of the left and the right directory list.<br>
+<br>
+<b>>Target = Source</b><br>
+<br>
+Sets the path of the current directory for both left and right lists.<br>
+<br>
+
+<h3>2240-Show</h2>
+<br>
+<b>"SHOW" MENU</b><br>
+<br>
+The show menu is for modifying and filtering the view of the currently displayed directory.<br><br>
+<br>
+<b>>All Files/Custom</b><br>
+<br>
+SymCommander allows you to limit the directory display according to a special file mask. You will only see files, which names are matching to the file mask you specified. Choose "Custom" and enter the desired file mask. Allowed wildcards are <b>?</b> (any single char) and <b>*</b> (any chars until the end of the name section).<br>
+<br>
+For deactivating the file mask filter choose "All files". To reactivate the last filter again choose the second menu item.<br>
+<br>
+<b>>Sort by</b><br>
+<br>
+You can sort the directory listing by file name, file size or file date by choosing one of these three menu items. You can also click the associated title of the directory list to change the sorting. By clicking multiple times on the list titles the sorting will switch between ascending and descending.<br>
+<br>
+<b>>Reversed Order</b><br>
+<br>
+This will change the current sorting between ascending and descending.<br>
+<br>
+<b>>Reread Source</b><br>
+<br>
+This will reload and display the directory of the current drive and path of the active list again. Use this if you changed the floppy disc or if other applications made changes to files and directories.<br>
+<br>
+
+<h3>2250-Configuration</h2>
+<br>
+<b>"CONFIGURATION" MENU</b><br>
+<br>
+<b>>Options</b><br>
+<br>
+[...]<br>
+<br>
+<b>>Save Settings</b><br>
+<br>
+This will save the current settings. The path of the left and the right directory lists are saved as well as the list and buffer parameters and additional settings of the option dialogue described above. They will be restored on the next start of SymCommander.<br>
+<br>
+The settings are saved in the SYMCMDER.INI file, which is located in the same drive and directory like SymCommander (SYMCMDER.EXE) itself. If you are working with a floppy-based system please take care, that the correct disc containing SymCommander is inserted when saving the settings.<br>
+<br>
+
+<h2>2300-Keyboard shortcuts</h2>
+<br>
+<b>KEYBOARD SHORTCUTS</b><br>
+<br>
+The following is a list of all available keyboard shortcuts.<br>
+<br>
+<b>Navigation</b><br>
+<br>
+Tab             <t5>switch between left/right directory<br>
+Del             <t5>jump to parent directory<br>
+Alt+F1          <t5>change left drive<br>
+Alt+F2          <t5>change right drive<br>
+<au><ad>        <t5>move through the current list<br>
+<au><ad>+Ctrl   <t5>jump through the current list<br>
+Ctrl+R          <t5>reload directory of the current list<br>
+Ctrl+U          <t5>swap left and right list<br>
+Escape          <t5>delete command line text<br>
+Return          <t5>open selected or entered file<br>
+<br>
+<b>File selection</b><br>
+(see also <u 2220>MARK</u> menu)<br>
+<br>
+Space           <t5>(un)select files in the current list<br>
+Shift+<au><ad>  <t5>(un)select files in the current list<br>
+*               <t5>invert the current file selection<br>
++               <t5>add files of a special type<br>
+-               <t5>remove files of a special type<br>
+<br>
+<b>File operations</b><br>
+(see also <u 2230>COMMANDS</u> and <u 2210>FILES</u> menu)<br>
+<br>
+F1              <t5>open help<br>
+F2              <t5>show drive information<br>
+F5              <t5>copy selected files<br>
+F6              <t5>move or rename selected file(s)<br>
+F7              <t5>create new sub directory<br>
+F8              <t5>delete selected files<br>
+Alt+Ret         <t5>edit properties of the selected file<br>
+<br>
