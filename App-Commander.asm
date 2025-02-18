@@ -8,12 +8,55 @@
 
 relocate_start
 
+
+;-----------------------------------
+;copy files in nested subdirectories
+;-----------------------------------
+;pathsrc = source      path
+;pathdst = destination path
+;
+;dim filepos(20)
+;depth = 0
+;
+;filepos(depth) = 0
+;entries = getdir(pathsrc)
+;
+;doit = true
+;while doit
+;    if len(entries) > filepos(depth):
+;        file = entries(filepos(depth))
+;        filepos(depth) = filepos(depth) + 1
+;        if file.typ = file:
+;            copy(pathsrc + "/" + file.name, pathdst + "/" + file.name)
+;        else if file.typ = dir:
+;            mkdir(pathdst + "/" + file.name)
+;            pathsrc = pathsrc + "/" + file.name
+;            pathdst = pathdst + "/" + file.name
+;            depth = depth + 1
+;            filepos(depth) = 0
+;            entries = getdir(pathsrc)
+;        endif
+;    else:
+;        ##remove all files in pathsrc, if this is a move command##
+;        if depth > 0:
+;            pathsrc = go_parent(pathsrc)
+;            pathdst = go_parent(pathdst)
+;            depth = depth - 1
+;            entries = getdir(pathsrc)
+;        else:
+;            doit = false
+;        endif
+;    endif
+;wend
+;-----------------------------------
+
 ;TODO
-;- 1 selected -> button = "rename"; 1+ marked -> button = "move"
+;- recursive copy/move/delete
+;- swap list doesn't update menu sorting flags in
 ;+ Edit Verknüpfung
 ;- View Verknüpfung
+;- 1 selected -> button = "rename"; 1+ marked -> button = "move"
 ;- Verzeichnisse vergleichen
-;- recursive copy/move
 ;- Search
 
 ;==============================================================================
@@ -68,11 +111,13 @@ prgmemtab   db "SymExe10"           ;SymbOS-EXE-Kennung                 POST Tab
             dw 0                    ;zusätzlicher Data-Speicher
             dw 0                    ;zusätzlicher Transfer-Speicher
             ds 26                   ;*reserviert*
-            db 0,2                  ;required OS version (2.0)
-prgicnsml   db 2,8,8:db #77,#00:db #8F,#CC:db #9F,#FF:db #AF,#1F:db #AF,#1F:db #CF,#2E:db #CF,#2E:db #77,#CC
-prgicnbig   db 6,24,24,#00,#00,#00,#00,#00,#00,#33,#FE,#00,#00,#00,#00,#47,#1F,#80,#FF,#CC,#00,#8F,#0F,#FF,#0F,#6C,#00,#8F,#0F,#0F,#0F,#6C,#00,#8F,#0F,#0F,#0F,#7D,#EE,#8F,#3E,#E3,#1F,#EF,#3E,#8F,#4B,#16,#EF,#0F,#6C,#8F,#82,#0A,#87
-            db #0F,#6C,#9F,#0D,#05,#4F,#0F,#C8,#9E,#0A,#0A,#4B,#0F,#C8,#9E,#04,#05,#43,#1F,#80,#9E,#08,#02,#4B,#1F,#80,#9F,#0C,#05,#4F,#3E,#00,#9F,#82,#0A,#87,#3E,#00,#9F,#4B,#16,#C3,#6C,#00,#AF,#3E,#E3,#E7,#6C,#00,#EF,#0F,#0F,#F7
-            db #C0,#00,#CF,#0F,#7F,#FB,#88,#00,#47,#7F,#F8,#B1,#CC,#00,#77,#F8,#80,#10,#EE,#00,#30,#80,#00,#00,#F7,#00,#00,#00,#00,#00,#72,#80,#00,#00,#00,#00,#30,#00
+            db 0,4                  ;required OS version (4.0)
+prgicnsml   db 2,8,8
+            db #77,#00,#8f,#cc,#9f,#ff,#af,#1f,#af,#1f,#cf,#2e,#cf,#2e,#77,#cc
+prgicnbig   db 6,24,24
+            db #0f,#08,#00,#00,#03,#1e,#7e,#88,#00,#00,#23,#fe,#7e,#bb,#ff,#ff,#ab,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#bb,#ff,#ff,#ab,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#88,#00,#00,#23,#fe
+            db #7e,#bb,#ff,#ff,#ab,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#ff,#ff,#ff,#ef,#fe,#6f,#0f,#0f,#0f,#0f,#fe,#7f,#ff,#ff,#ff,#ff,#fe,#7f,#ff,#ff,#ff,#ff,#fe,#7f,#fc,#f0,#f0,#f1,#fe,#7f,#ed,#0f,#0f,#c7,#fe
+            db #7f,#ed,#0f,#0f,#e7,#fe,#7f,#ed,#e0,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#00,#0f,#e7,#fe,#b7,#ed,#0f,#0f,#e7,#fc,#f0,#f0,#f0,#f0,#f0,#f0
 
 
 ;### PRGPRZ -> Programm-Prozess
@@ -102,6 +147,9 @@ prgprz  call SySystem_HLPINI
         ld (prgbnk),a           ;Bank*16 merken
         call devini             ;vorhandene Laufwerke holen
         call cfgini             ;Config-Pfad generieren und Config laden
+        ld a,(lstakt)
+        or a
+        call lstswp6
         call lstini             ;Speicher für Listen reservieren und vorbereiten
         jp c,prgend
 
@@ -2298,6 +2346,9 @@ shwref1 ld a,(lstakt)
 ;### SHWDEF -> Zeigt Files mit zuvor definierter Maske an
 shwdef  ld a,(lstakt)
         or a
+        push af
+        call lstswp6
+        pop af
         ld de,pthmsk1
         ld hl,pthcst1
         jr z,shwdef1
@@ -2769,16 +2820,7 @@ lstswp  ld a,(lstakt)
         xor 1
         ld (lstakt),a
         push af
-        ld hl,pthcst1
-        ld de,pthmsk1
-        ld ix,prgobjdsc1
-        ld iy,prgobjdsc2
-        jr z,lstswp5
-        ld hl,pthcst2
-        ld de,pthmsk2
-        ld ix,prgobjdsc2
-        ld iy,prgobjdsc1
-lstswp5 ld (prgwinmen4+2+8+2),hl    ;Custom-Maske anpassen
+        call lstswp6
         ld (ix+2),3+0+128
         ld (iy+2),2+4+128
         ld hl,swhallm
@@ -2799,6 +2841,23 @@ lstswp4 ld a,c
         call msgsnd0
         pop af
         jp pthupd
+
+lstswp6 ld hl,pthcst1       ;*** Menu an Costum maske anpassen (zf=1 list1, zf=0 list2)
+        ld de,pthmsk1
+        ld ix,prgobjdsc1
+        ld iy,prgobjdsc2
+        jr z,lstswp5
+        ld hl,pthcst2
+        ld de,pthmsk2
+        ld ix,prgobjdsc2
+        ld iy,prgobjdsc1
+lstswp5 push de
+        ld de,prgwinmen4tx2+6       ;Custom-Maske anpassen
+        ld bc,9
+        ldir
+        pop de
+        ret
+
 lstswp0 call shwnam0        ;*** Menu an Sortierung anpassen
         ld c,a                      ;A=Sort-Byte (bit0-5=spalte, b7=reihenfolge)
         rlca
@@ -3615,12 +3674,12 @@ prgcope push af
 prgdatbeg
 
 prgicn16c db 12,24,24:dw $+7:dw $+4,12*24:db 5
-db #88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#11,#11,#1D,#88,#88,#88,#88,#88,#88,#88,#88,#81,#CC,#CC,#C1,#D8,#88,#11,#11,#11,#88,#88,#88,#1C,#CC,#CC,#CC,#11,#11,#CC,#CC,#C1,#D8,#88,#88
-db #1C,#CC,#CC,#CC,#CC,#CC,#CC,#CC,#C1,#D8,#88,#88,#1C,#CC,#CC,#CC,#CC,#CC,#CC,#CC,#C1,#D1,#11,#18,#1C,#CC,#CC,#13,#33,#1C,#CC,#C1,#11,#1C,#CC,#1D,#1C,#CC,#C3,#CC,#4C,#C3,#11,#1C,#CC,#CC,#C1,#D8
-db #1C,#CC,#34,#C4,#C4,#C4,#3C,#CC,#CC,#CC,#C1,#D8,#1C,#C1,#CC,#4C,#4C,#4C,#C1,#CC,#CC,#CC,#1D,#88,#1C,#C3,#C4,#C4,#C4,#C4,#C3,#CC,#CC,#CC,#1D,#88,#1C,#C3,#4C,#44,#4C,#4C,#43,#CC,#CC,#C1,#D8,#88
-db #1C,#C3,#C4,#44,#44,#C4,#C3,#CC,#CC,#C1,#D8,#88,#1C,#C1,#CC,#44,#4C,#4C,#C1,#CC,#CC,#1D,#88,#88,#1C,#C1,#34,#C4,#C4,#C4,#3C,#CC,#CC,#1D,#88,#88,#1C,#C1,#C3,#CC,#4C,#C3,#33,#CC,#C1,#D8,#88,#88
-db #1C,#1C,#CC,#13,#33,#1C,#31,#1C,#C1,#D8,#88,#88,#11,#1C,#CC,#CC,#CC,#CC,#31,#11,#3D,#88,#88,#88,#11,#CC,#CC,#CC,#C1,#11,#13,#11,#18,#88,#88,#88,#81,#CC,#C1,#11,#1D,#DD,#D8,#31,#11,#88,#88,#88
-db #81,#11,#1D,#DD,#D8,#88,#88,#83,#11,#18,#88,#88,#88,#8D,#D8,#88,#88,#88,#88,#88,#31,#11,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#83,#13,#38,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#33,#88,#88
+db #66,#66,#68,#88,#88,#88,#88,#88,#88,#66,#66,#61,#65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51,#65,#51,#58,#66,#66,#66,#66,#66,#68,#56,#55,#51,#65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51
+db #65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51,#65,#51,#58,#66,#66,#66,#66,#66,#68,#56,#55,#51,#65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51,#65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51
+db #65,#51,#58,#66,#66,#66,#66,#66,#68,#56,#55,#51,#65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51,#65,#51,#55,#55,#55,#55,#55,#55,#55,#56,#55,#51,#65,#56,#66,#66,#66,#66,#66,#66,#66,#66,#55,#51
+db #65,#55,#55,#55,#55,#55,#55,#55,#55,#55,#55,#51,#65,#55,#55,#55,#55,#55,#55,#55,#55,#55,#55,#51,#65,#55,#55,#11,#11,#11,#11,#11,#11,#15,#55,#51,#65,#55,#55,#1d,#dd,#dd,#dd,#dd,#15,#66,#55,#51
+db #65,#55,#55,#1d,#dd,#dd,#dd,#dd,#15,#56,#55,#51,#65,#55,#55,#1d,#11,#18,#dd,#dd,#15,#56,#55,#51,#65,#55,#55,#1d,#15,#58,#dd,#dd,#15,#56,#55,#51,#65,#55,#55,#1d,#15,#58,#dd,#dd,#15,#56,#55,#51
+db #65,#55,#55,#1d,#15,#58,#dd,#dd,#15,#56,#55,#51,#65,#55,#55,#1d,#88,#88,#dd,#dd,#15,#56,#55,#51,#16,#55,#55,#1d,#dd,#dd,#dd,#dd,#15,#56,#55,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11
 
 ;### Config-Daten
 cfgbeg              ;**Anfang Config**
@@ -3655,11 +3714,12 @@ cfgovr  db 1        ;Flag, ob bei Überschreiben fragen
 
 cfgend              ;**Ende Config**
 
-
 ;### Verschiedenes
 prgmsginf1 db "SymCOMMANDER",0
-prgmsginf2 db " Version 1.6 (Build 211128pdt)",0
-prgmsginf3 db " Copyright <c> 2021 SymbiosiS",0
+prgmsginf2 db " Version 1.7 (Build "
+read "..\..\..\SRC-Main\build.asm"
+            db "pdt)",0
+prgmsginf3 db " Copyright <c> 2025 SymbiosiS",0
 
 prgmsgerr1  db "Disc error (Code "
 prgmsgerr1a db "##):"
@@ -3707,7 +3767,7 @@ prgmsgerr32 db "Device channel is not available",0
 prgmsgerru  db "*Undefined Error*",0
 prgmsgerrs  db "*Unknown Error*",0
 
-prgwintit   db "SymCommander 1.6",0
+prgwintit   db "SymCommander 1.7",0
 
 prgtxtok    db "Ok",0
 prgtxtcnc   db "Cancel",0
@@ -3715,50 +3775,92 @@ prgtxtyes   db "Yes",0
 prgtxtno    db "No",0
 
 ;### Menues
+menicn_null         db 4,8,1:dw $+7,$+4,4:db 5: db #66,#66,#66,#66
+
 prgwinmentx1 db "Files",0
-prgwinmen1tx1 db "Open",0
-prgwinmen1tx2 db "Change Attributes...",0
-prgwinmen1tx3 db "Properties",0
-prgwinmen1tx4 db "Drive information",0
-prgwinmen1tx5 db "Split File...",0
-prgwinmen1tx6 db "Combine Files...",0
-prgwinmen1tx7 db "Quit",0
+prgwinmen1tx1 db 6,128,-1:dw menicn_fileopen    +1:db " Open",0
+prgwinmen1tx2 db 6,128,-1:dw menicn_attributes  +1:db " Change Attributes...",0
+prgwinmen1tx3 db 6,128,-1:dw menicn_properties  +1:db " Properties",0
+prgwinmen1tx4 db 6,128,-1:dw menicn_driveinfo   +1:db " Drive information",0
+prgwinmen1tx5 db 6,128,-1:dw menicn_filesplit   +1:db " Split File...",0
+prgwinmen1tx6 db 6,128,-1:dw menicn_filecombine +1:db " Combine Files...",0
+prgwinmen1tx7 db 6,128,-1:dw menicn_quit        +1:db " Quit",0
+
+menicn_fileopen     db 4,8,7:dw $+7,$+4,28:db 5: db #61,#16,#66,#66, #18,#81,#16,#66, #18,#88,#77,#77, #18,#87,#22,#27, #18,#72,#22,#76, #17,#22,#27,#66, #77,#77,#76,#66
+menicn_attributes   db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#61,#16, #66,#00,#01,#11, #60,#88,#11,#01, #60,#88,#11,#06, #11,#81,#18,#06, #61,#11,#18,#06, #66,#11,#00,#66
+menicn_properties   db 4,8,7:dw $+7,$+4,28:db 5: db #16,#77,#17,#77, #66,#66,#66,#66, #16,#77,#77,#17, #66,#66,#66,#66, #86,#77,#71,#77, #66,#66,#66,#66, #16,#71,#77,#77
+menicn_driveinfo    db 4,8,7:dw $+7,$+4,28:db 5: db #66,#77,#00,#66, #67,#77,#00,#06, #77,#77,#00,#00, #77,#77,#99,#00, #77,#79,#99,#99, #67,#99,#99,#96, #66,#99,#99,#66
+menicn_filesplit    db 4,8,7:dw $+7,$+4,28:db 5: db #68,#8f,#f8,#86, #68,#ff,#ff,#86, #68,#88,#88,#86, #11,#11,#11,#11, #68,#88,#88,#86, #68,#ff,#ff,#86, #68,#8f,#f8,#86
+menicn_filecombine  db 4,8,7:dw $+7,$+4,28:db 5: db #68,#99,#99,#86, #68,#89,#98,#86, #68,#88,#88,#86, #11,#11,#11,#11, #68,#88,#88,#86, #68,#89,#98,#86, #68,#99,#99,#86
+menicn_quit         db 4,8,7:dw $+7,$+4,28:db 5: db #11,#16,#16,#66, #14,#46,#11,#66, #14,#11,#1e,#16, #14,#1e,#ee,#e1, #14,#11,#1e,#16, #14,#46,#11,#66, #11,#16,#16,#66
 
 prgwinmentx2 db "Mark",0
-prgwinmen2tx1 db "Select Group...",0
-prgwinmen2tx2 db "Unselect Group...",0
-prgwinmen2tx3 db "Select All",0
-prgwinmen2tx4 db "Unselect All",0
-prgwinmen2tx5 db "Invert Selection",0
-prgwinmen2tx6 db "Compare Directories",0
+prgwinmen2tx1 db 6,128,-1:dw menicn_selectadd   +1:db " Select Group...",0
+prgwinmen2tx2 db 6,128,-1:dw menicn_selectremove+1:db " Unselect Group...",0
+prgwinmen2tx3 db 6,128,-1:dw menicn_selectall   +1:db " Select All",0
+prgwinmen2tx4 db 6,128,-1:dw menicn_selectnone  +1:db " Unselect All",0
+prgwinmen2tx5 db 6,128,-1:dw menicn_selectinvert+1:db " Invert Selection",0
+prgwinmen2tx6 db 6,128,-1:dw menicn_null        +1:db " Compare Directories",0
+
+menicn_selectadd    db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#6f,#f6,#66, #ff,#ff,#f6,#66, #6f,#ff,#66,#66, #ff,#ff,#f6,#66, #ff,#6f,#f6,#96, #66,#66,#69,#99, #66,#66,#66,#96
+menicn_selectremove db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#6f,#f6,#66, #ff,#ff,#f6,#66, #6f,#ff,#66,#66, #ff,#ff,#f6,#66, #ff,#6f,#f6,#66, #66,#66,#63,#33, #66,#66,#66,#66
+menicn_selectall    db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #6f,#f6,#6f,#f6, #6f,#ff,#ff,#f6, #66,#ff,#ff,#66, #66,#ff,#ff,#66, #6f,#ff,#ff,#f6, #6f,#f6,#6f,#f6
+menicn_selectnone   db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #68,#86,#68,#86, #68,#88,#88,#86, #66,#88,#88,#66, #66,#88,#88,#66, #68,#88,#88,#86, #68,#86,#68,#86
+menicn_selectinvert db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#6f,#f6,#66, #ff,#ff,#f6,#66, #6f,#ff,#66,#66, #ff,#ff,#f6,#66, #ff,#6f,#f1,#11, #66,#66,#61,#18, #66,#66,#61,#88
+;     _comparedirs
 
 prgwinmentx3 db "Commands",0
-prgwinmen3tx1 db "Copy Files...",0
-prgwinmen3tx2 db "Move Files...",0
-prgwinmen3tx3 db "Delete Files",0
-prgwinmen3tx4 db "New Folder...",0
-prgwinmen3tx5 db "View File",0
-prgwinmen3tx6 db "Edit File",0
-prgwinmen3tx7 db "Search...",0
-prgwinmen3tx8 db "Source <-> Target",0
-prgwinmen3tx9 db "Target = Source",0
+prgwinmen3tx1 db 6,128,-1:dw menicn_copy        +1:db " Copy Files...",0
+prgwinmen3tx2 db 6,128,-1:dw menicn_move        +1:db " Move Files...",0
+prgwinmen3tx3 db 6,128,-1:dw menicn_delete      +1:db " Delete Files",0
+prgwinmen3tx4 db 6,128,-1:dw menicn_folder      +1:db " New Folder...",0
+prgwinmen3tx5 db 6,128,-1:dw menicn_fileview    +1:db " View File",0
+prgwinmen3tx6 db 6,128,-1:dw menicn_fileedit    +1:db " Edit File",0
+prgwinmen3tx7 db 6,128,-1:dw menicn_find        +1:db " Search...",0
+prgwinmen3tx8 db 6,128,-1:dw menicn_dirswap     +1:db " Source <-> Target",0
+prgwinmen3tx9 db 6,128,-1:dw menicn_dirsame     +1:db " Target = Source",0
+
+menicn_copy         db 4,8,7:dw $+7,$+4,28:db 5: db #55,#55,#56,#66, #58,#88,#56,#66, #58,#88,#57,#77, #58,#88,#50,#07, #55,#55,#50,#07, #66,#67,#00,#07, #66,#67,#77,#77
+menicn_move         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#33,#36,#66, #33,#22,#23,#36, #32,#22,#22,#36, #32,#55,#55,#55, #33,#58,#88,#85, #66,#58,#88,#85, #66,#55,#55,#55
+menicn_delete       db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#66,#66,#ff, #6f,#f6,#6f,#f6, #66,#ff,#ff,#66, #66,#6f,#f6,#66, #66,#ff,#ff,#66, #6f,#f6,#6f,#f6, #ff,#66,#66,#ff
+menicn_folder       db 4,8,7:dw $+7,$+4,28:db 5: db #6d,#dd,#66,#66, #d0,#00,#dd,#d6, #d0,#07,#00,#01, #d0,#77,#70,#01, #d0,#07,#00,#01, #d0,#00,#00,#01, #61,#11,#11,#16
+menicn_fileview     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#77,#77,#76, #66,#78,#88,#77, #66,#11,#18,#87, #66,#18,#18,#87, #66,#11,#18,#87, #61,#78,#88,#87, #16,#77,#77,#77
+menicn_fileedit     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#16, #ff,#ff,#81,#01, #88,#88,#10,#d6, #ff,#81,#0d,#86, #88,#30,#d8,#86, #f8,#33,#8f,#f6, #88,#88,#88,#86
+menicn_find         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#16,#61,#66, #61,#71,#17,#16, #61,#71,#17,#16, #17,#71,#17,#71, #18,#16,#61,#81, #17,#16,#61,#71, #11,#16,#61,#11
+menicn_dirswap      db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#16, #17,#77,#76,#71, #18,#8f,#88,#81, #18,#f8,#8f,#81, #18,#f8,#8f,#81, #18,#88,#f8,#81, #61,#11,#11,#16
+menicn_dirsame      db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#16, #17,#77,#76,#71, #18,#99,#99,#81, #18,#88,#88,#81, #18,#99,#99,#81, #18,#88,#88,#81, #61,#11,#11,#16
 
 prgwinmentx4 db "Show",0
-prgwinmen4tx1  db "All Files",0
-prgwinmen4tx2  db "Custom...",0
-prgwinmen4tx3  db "Sort By Name",0
-prgwinmen4tx4  db "Sort By Size",0
-prgwinmen4tx5  db "Sort By Date",0
-prgwinmen4tx6  db "Reversed Order",0
-prgwinmen4tx7  db "Reread Source",0
+prgwinmen4tx1  db 6,128,-1:dw menicn_showall     +1:db  " All Files",0
+prgwinmen4tx2  db 6,128,-1:dw menicn_null        +1:db  " xxxxxxxx",0
+prgwinmen4tx3  db 6,128,-1:dw menicn_showcustom  +1:db  " Custom...",0
+prgwinmen4tx4  db 6,128,-1:dw menicn_sortname    +1:db  " Sort By Name",0
+prgwinmen4tx5  db 6,128,-1:dw menicn_sortsize    +1:db  " Sort By Size",0
+prgwinmen4tx6  db 6,128,-1:dw menicn_datetime    +1:db  " Sort By Date",0
+prgwinmen4tx7  db 6,128,-1:dw menicn_sortreverse +1:db  " Reversed Order",0
+prgwinmen4tx8  db 6,128,-1:dw menicn_refresh     +1:db  " Reread Source",0
+
+menicn_showall      db 4,8,7:dw $+7,$+4,28:db 5: db #66,#69,#96,#66, #99,#69,#96,#99, #99,#99,#99,#99, #66,#99,#99,#66, #69,#99,#99,#96, #99,#96,#69,#99, #99,#66,#66,#99
+menicn_showcustom   db 4,8,7:dw $+7,$+4,28:db 5: db #6f,#ff,#ff,#f6, #ff,#f6,#6f,#ff, #66,#66,#6f,#ff, #66,#6f,#ff,#f6, #66,#ff,#f6,#66, #66,#66,#66,#66, #66,#ff,#f6,#66
+menicn_sortname     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #61,#66,#66,#55, #16,#17,#65,#66, #11,#17,#65,#66, #16,#17,#77,#66, #16,#17,#67,#55, #66,#67,#77,#66
+menicn_sortsize     db 4,8,7:dw $+7,$+4,28:db 5: db #65,#66,#66,#66, #55,#66,#61,#16, #65,#77,#66,#61, #65,#66,#76,#11, #65,#67,#66,#61, #66,#76,#61,#16, #66,#77,#76,#66
+menicn_datetime     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#77,#77,#66, #67,#8a,#18,#76, #78,#88,#18,#87, #7a,#81,#88,#a7, #78,#18,#88,#87, #67,#88,#a8,#76, #66,#77,#77,#66
+menicn_sortreverse  db 4,8,7:dw $+7,$+4,28:db 5: db #11,#16,#66,#66, #66,#16,#66,#66, #61,#66,#67,#76, #16,#66,#76,#67, #11,#16,#77,#77, #66,#66,#76,#67, #66,#66,#76,#67
+menicn_refresh      db 4,8,7:dw $+7,$+4,28:db 5: db #00,#99,#90,#00, #09,#00,#09,#09, #00,#00,#00,#99, #99,#90,#09,#99, #99,#00,#00,#00, #90,#90,#00,#90, #00,#09,#99,#00
 
 prgwinmentx5 db "Configuration",0
-prgwinmen5tx1 db "Options...",0
-prgwinmen5tx2 db "Save Settings",0
+prgwinmen5tx1 db 6,128,-1:dw menicn_settings    +1:db " Options...",0
+prgwinmen5tx2 db 6,128,-1:dw menicn_filesave    +1:db " Save Settings",0
+
+menicn_settings     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#6c,#66,#66, #6c,#6c,#6c,#66, #6f,#cd,#cf,#66, #cc,#c1,#cc,#c6, #ff,#cc,#cf,#f6, #6c,#fc,#fc,#66, #6f,#6c,#6f,#66
+menicn_filesave     db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#11, #1f,#ee,#ee,#f1, #1f,#ee,#ee,#f1, #1f,#ff,#ff,#f1, #1f,#11,#c1,#f1, #1f,#11,#c1,#f1, #61,#11,#11,#11
 
 prgwinmentx6 db "?",0
-prgwinmen6tx1 db "Help topics",0
-prgwinmen6tx2 db "About SymCommander...",0
+prgwinmen6tx1 db 6,128,-1:dw menicn_help        +1:db " Help topics",0
+prgwinmen6tx2 db 6,128,-1:dw menicn_about       +1:db " About SymCommander...",0
+
+menicn_help         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#1f,#f1,#66, #61,#fc,#cf,#16, #1f,#ff,#fc,#f1, #ff,#fc,#cc,#f1, #ff,#ff,#ff,#18, #1f,#cf,#f1,#81, #61,#ff,#18,#16
+menicn_about        db 4,8,7:dw $+7,$+4,28:db 5: db #66,#10,#07,#66, #66,#10,#07,#66, #66,#66,#66,#66, #61,#00,#07,#66, #66,#10,#07,#66, #66,#10,#07,#66, #61,#00,#00,#76
 
 ;### Haupt-Fenster-Texte
 prgobjtxt1  db "View",0
@@ -4189,14 +4291,14 @@ configchk2  dw configovr,configtxt8,2+4
 prgwindat dw #3702,3,05,05,300,150,0,0,300,150,200,100,10000,10000,prgicnsml,prgwintit,0,prgwinmen,prgwingrp,0,0:ds 136+14
 
 prgwinmen  dw 6, 1+4,prgwinmentx1,prgwinmen1,0, 1+4,prgwinmentx2,prgwinmen2,0, 1+4,prgwinmentx3,prgwinmen3,0, 1+4,prgwinmentx4,prgwinmen4,0, 1+4,prgwinmentx5,prgwinmen5,0, 1+4,prgwinmentx6,prgwinmen6,0
-prgwinmen1 dw 9, 1,prgwinmen1tx1,filopn,0,  1,prgwinmen1tx2,filatr,0, 1,prgwinmen1tx3,filprp,0, 1,prgwinmen1tx4,fildrv,0, 1+8,#0000,0,0, 1,prgwinmen1tx5,filspl,0,1,prgwinmen1tx6,filcmb,0,1+8,#0000,0,0, 1,prgwinmen1tx7,prgend,0
-prgwinmen2 dw 7, 1,prgwinmen2tx1,mrksel,0,  1,prgwinmen2tx2,mrkdes,0, 1,prgwinmen2tx3,mrkall,0, 1,prgwinmen2tx4,mrknon,0, 1,prgwinmen2tx5,mrkinv,0, 1+8,#0000,0,0, 0,prgwinmen2tx6,mrkcmp,0
-prgwinmen3 dw 11,1,prgwinmen3tx1,cmdcop,0,  1,prgwinmen3tx2,cmdmov,0, 1,prgwinmen3tx3,cmddel,0, 1,prgwinmen3tx4,cmdfol,0, 1+8,#0000,0,0, 0,prgwinmen3tx5,prgprz0,0,0,prgwinmen3tx6,prgprz0,0, 0,prgwinmen3tx7,prgprz0,0, 1+8,#0000,0,0
-           dw    1,prgwinmen3tx8,cmdswp,0,  1,prgwinmen3tx9,cmdequ,0
-prgwinmen4 dw 10,1+2,prgwinmen4tx1,shwall,0,1,pthcst1,shwdef,0,       1,prgwinmen4tx2,shwcst,0, 1+8,#0000,0,0, 1+2,prgwinmen4tx3,shwnam,0,  1,prgwinmen4tx4,shwsiz,0,  1,prgwinmen4tx5,shwdat,0,  1+8,#0000,0,0, 1,prgwinmen4tx6,shwrev,0
-           dw    1,prgwinmen4tx7,shwref,0
-prgwinmen5 dw 2, 1,prgwinmen5tx1,cfgset,0,  1,prgwinmen5tx2,cfgsav,0
-prgwinmen6 dw 3, 1,prgwinmen6tx1,hlpopn,0, 1+8,0,0,0, 1,prgwinmen6tx2,prginf,0
+prgwinmen1 dw 9, 17,prgwinmen1tx1,filopn,0,  17,prgwinmen1tx2,filatr,0, 17,prgwinmen1tx3,filprp,0, 17,prgwinmen1tx4,fildrv,0, 1+8,#0000,0,0, 17,prgwinmen1tx5,filspl,0,     17,prgwinmen1tx6,filcmb,0,1+8,#0000,0,0, 17,prgwinmen1tx7,prgend,0
+prgwinmen2 dw 7, 17,prgwinmen2tx1,mrksel,0,  17,prgwinmen2tx2,mrkdes,0, 17,prgwinmen2tx3,mrkall,0, 17,prgwinmen2tx4,mrknon,0, 17,prgwinmen2tx5,mrkinv,0, 1+8,#0000,0,0,     16,prgwinmen2tx6,mrkcmp,0
+prgwinmen3 dw 11,17,prgwinmen3tx1,cmdcop,0,  17,prgwinmen3tx2,cmdmov,0, 17,prgwinmen3tx3,cmddel,0, 17,prgwinmen3tx4,cmdfol,0, 1+8,#0000,0,0, 16,prgwinmen3tx5,prgprz0,0,    16,prgwinmen3tx6,prgprz0,0, 16,prgwinmen3tx7,prgprz0,0, 1+8,#0000,0,0
+           dw    17,prgwinmen3tx8,cmdswp,0,  17,prgwinmen3tx9,cmdequ,0
+prgwinmen4 dw 10,17+2,prgwinmen4tx1,shwall,0,17,prgwinmen4tx2,shwdef,0, 17,prgwinmen4tx3,shwcst,0, 1+8,#0000,0,0
+           dw    17+2,prgwinmen4tx4,shwnam,0,17,prgwinmen4tx5,shwsiz,0, 17,prgwinmen4tx6,shwdat,0, 1+8,#0000,0,0, 17,prgwinmen4tx7,shwrev,0, 17,prgwinmen4tx8,shwref,0
+prgwinmen5 dw 2, 17,prgwinmen5tx1,cfgset,0,  17,prgwinmen5tx2,cfgsav,0
+prgwinmen6 dw 3, 17,prgwinmen6tx1,hlpopn,0, 1+8,0,0,0, 17,prgwinmen6tx2,prginf,0
 
 prgwingrp db 22,0:dw prgwinobj,prgwinclc,0,0,0,0,6
 prgwinobj
@@ -4271,7 +4373,7 @@ prgobjdev1  dw 00,00+prgtabdev,01,05+prgtabdev,02,10+prgtabdev,03,15+prgtabdev,0
 
 ;### INFO-FENSTER #############################################################
 
-prgmsginf  dw prgmsginf1,4*1+2,prgmsginf2,4*1+2,prgmsginf3,4*1+2,prgicnbig
+prgmsginf  dw prgmsginf1,4*1+2,prgmsginf2,4*1+2,prgmsginf3,4*1+2,0,prgicnbig,prgicn16c
 
 ;### ERROR-FENSTER ############################################################
 
