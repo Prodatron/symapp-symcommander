@@ -2,123 +2,24 @@
 ;@                                                                            @
 ;@                  S y m  C o m m a n d e r   (FileManager)                  @
 ;@                                                                            @
-;@             (c) 2004-2020 by Prodatron / SymbiosiS (Jörn Mika)             @
+;@             (c) 2005-2025 by Prodatron / SymbiosiS (Jörn Mika)             @
 ;@                                                                            @
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-relocate_start
-
-
-;-----------------------------------
-;copy files in nested subdirectories
-;-----------------------------------
-;pathsrc = source      path
-;pathdst = destination path
-;
-;dim filepos(20)
-;depth = 0
-;
-;filepos(depth) = 0
-;entries = getdir(pathsrc)
-;
-;doit = true
-;while doit
-;    if len(entries) > filepos(depth):
-;        file = entries(filepos(depth))
-;        filepos(depth) = filepos(depth) + 1
-;        if file.typ = file:
-;            copy(pathsrc + "/" + file.name, pathdst + "/" + file.name)
-;        else if file.typ = dir:
-;            mkdir(pathdst + "/" + file.name)
-;            pathsrc = pathsrc + "/" + file.name
-;            pathdst = pathdst + "/" + file.name
-;            depth = depth + 1
-;            filepos(depth) = 0
-;            entries = getdir(pathsrc)
-;        endif
-;    else:
-;        ##remove all files in pathsrc, if this is a move command##
-;        if depth > 0:
-;            pathsrc = go_parent(pathsrc)
-;            pathdst = go_parent(pathdst)
-;            depth = depth - 1
-;            entries = getdir(pathsrc)
-;        else:
-;            doit = false
-;        endif
-;    endif
-;wend
-;-----------------------------------
 
 ;TODO
-;- recursive copy/move/delete
+;+ recursive copy/move/delete
+;- Edit Verknüpfung
 ;- swap list doesn't update menu sorting flags in
-;+ Edit Verknüpfung
-;- View Verknüpfung
 ;- 1 selected -> button = "rename"; 1+ marked -> button = "move"
+
+;- Viewer
 ;- Verzeichnisse vergleichen
 ;- Search
 
 ;==============================================================================
 ;### CODE-TEIL ################################################################
 ;==============================================================================
-
-;### PROGRAMM-KOPF ############################################################
-
-prgdatcod       equ 0           ;Länge Code-Teil (Pos+Len beliebig; inklusive Kopf!)
-prgdatdat       equ 2           ;Länge Daten-Teil (innerhalb 16K Block)
-prgdattra       equ 4           ;Länge Transfer-Teil (ab #C000)
-prgdatorg       equ 6           ;Original-Origin
-prgdatrel       equ 8           ;Anzahl Einträge Relocator-Tabelle
-prgdatstk       equ 10          ;Länge Stack (Transfer-Teil beginnt immer mit Stack)
-prgdatrs1       equ 12          ;*reserved* (3 bytes)
-prgdatnam       equ 15          ;program name (24+1[0] chars)
-prgdatflg       equ 40          ;flags (+1=16colour icon available)
-prgdat16i       equ 41          ;file offset of 16colour icon
-prgdatrs2       equ 43          ;*reserved* (5 bytes)
-prgdatidn       equ 48          ;"SymExe10"
-prgdatcex       equ 56          ;zusätzlicher Speicher für Code-Bereich
-prgdatdex       equ 58          ;zusätzlicher Speicher für Data-Bereich
-prgdattex       equ 60          ;zusätzlicher Speicher für Transfer-Bereich
-prgdatres       equ 62          ;*reserviert* (26 bytes)
-prgdatver       equ 88          ;required OS version (1.0)
-prgdatism       equ 90          ;Icon (klein)
-prgdatibg       equ 109         ;Icon (gross)
-prgdatlen       equ 256         ;Datensatzlänge
-
-prgpstdat       equ 6           ;Adresse Daten-Teil
-prgpsttra       equ 8           ;Adresse Transfer-Teil
-prgpstspz       equ 10          ;zusätzliche Prozessnummern (4*1)
-prgpstbnk       equ 14          ;Bank (1-8)
-prgpstmem       equ 48          ;zusätzliche Memory-Bereiche (8*5)
-prgpstnum       equ 88          ;Programm-Nummer
-prgpstprz       equ 89          ;Prozess-Nummer
-
-prgcodbeg   dw prgdatbeg-prgcodbeg  ;Länge Code-Teil
-            dw prgtrnbeg-prgdatbeg  ;Länge Daten-Teil
-            dw prgtrnend-prgtrnbeg  ;Länge Transfer-Teil
-prgdatadr   dw #1000                ;Original-Origin                    POST Adresse Daten-Teil
-prgtrnadr   dw relocate_count       ;Anzahl Einträge Relocator-Tabelle  POST Adresse Transfer-Teil
-prgprztab   dw prgstk-prgtrnbeg     ;Länge Stack                        POST Tabelle Prozesse
-            dw 0                    ;*reserved*
-prgbnknum   db 0                    ;*reserved*                         POST bank number
-            db "SymCommander":ds 12:db 0 ;Name
-            db 1                    ;flags (+1=16c icon)
-            dw prgicn16c-prgcodbeg  ;16 colour icon offset
-            ds 5                    ;*reserved*
-prgmemtab   db "SymExe10"           ;SymbOS-EXE-Kennung                 POST Tabelle Speicherbereiche
-            dw 0                    ;zusätzlicher Code-Speicher
-            dw 0                    ;zusätzlicher Data-Speicher
-            dw 0                    ;zusätzlicher Transfer-Speicher
-            ds 26                   ;*reserviert*
-            db 0,4                  ;required OS version (4.0)
-prgicnsml   db 2,8,8
-            db #77,#00,#8f,#cc,#9f,#ff,#af,#1f,#af,#1f,#cf,#2e,#cf,#2e,#77,#cc
-prgicnbig   db 6,24,24
-            db #0f,#08,#00,#00,#03,#1e,#7e,#88,#00,#00,#23,#fe,#7e,#bb,#ff,#ff,#ab,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#bb,#ff,#ff,#ab,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#88,#00,#00,#23,#fe
-            db #7e,#bb,#ff,#ff,#ab,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#ff,#ff,#ff,#ef,#fe,#6f,#0f,#0f,#0f,#0f,#fe,#7f,#ff,#ff,#ff,#ff,#fe,#7f,#ff,#ff,#ff,#ff,#fe,#7f,#fc,#f0,#f0,#f1,#fe,#7f,#ed,#0f,#0f,#c7,#fe
-            db #7f,#ed,#0f,#0f,#e7,#fe,#7f,#ed,#e0,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#00,#0f,#e7,#fe,#b7,#ed,#0f,#0f,#e7,#fc,#f0,#f0,#f0,#f0,#f0,#f0
-
 
 ;### PRGPRZ -> Programm-Prozess
 dskprzn     db 2
@@ -128,8 +29,9 @@ prgwin      db 0    ;Nummer des Haupt-Fensters
 diawin      db 0    ;Nummer des Dialog-Fensters
 prgbnk      db 0    ;Bank des Programmes*16
 
-prgprz  call SySystem_HLPINI
-        ld a,(prgprzn)
+prgprz  call prglng
+        call SySystem_HLPINI
+        ld a,(App_PrcID)
         ld (prgwindat+windatprz),a
         ld (diainpwin+windatprz),a
         ld (drvprpwin+windatprz),a
@@ -139,12 +41,13 @@ prgprz  call SySystem_HLPINI
         ld (configwin+windatprz),a
         ld (confrmwin+windatprz),a
         ld (ovrwrtwin+windatprz),a
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         add a
         add a
         add a
         add a
         ld (prgbnk),a           ;Bank*16 merken
+        call sysini             ;init system specific stuff
         call devini             ;vorhandene Laufwerke holen
         call cfgini             ;Config-Pfad generieren und Config laden
         ld a,(lstakt)
@@ -153,8 +56,10 @@ prgprz  call SySystem_HLPINI
         call lstini             ;Speicher für Listen reservieren und vorbereiten
         jp c,prgend
 
+;call tretst
+
         ld c,MSC_DSK_WINOPN
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         ld b,a
         ld de,prgwindat
         call msgsnd             ;Fenster aufbauen
@@ -163,7 +68,7 @@ prgprz1 call msgdsk             ;Message holen -> IXL=Status, IXH=Absender-Proze
         jp z,prgend             ;kein Speicher für Fenster -> Prozeß beenden
         cp MSR_DSK_WOPNOK
         jr nz,prgprz1           ;andere Message als "Fenster geöffnet" -> ignorieren
-        ld a,(prgmsgb+4)
+        ld a,(App_MsgBuf+4)
         ld (prgwin),a           ;Fenster wurde geöffnet -> Nummer merken
 
 prgprz3 xor a
@@ -268,11 +173,11 @@ prgkey2 inc hl
         jp (hl)
 
 ;### PRGEND -> Programm beenden
-prgend  ld ix,(prgprzn)
+prgend  ld ix,(App_PrcID)
         db #dd:ld h,PRC_ID_SYSTEM
-        ld iy,prgmsgb
+        ld iy,App_MsgBuf
         ld (iy+0),MSC_SYS_PRGEND
-        ld a,(prgcodbeg+prgpstnum)
+        ld a,(App_BegCode+prgpstnum)
         ld (iy+1),a
         rst #10
 prgend0 rst #30
@@ -283,15 +188,15 @@ prginf  ld hl,prgmsginf         ;*** Info-Fenster
         ld b,1+128
         call prginf0
         jp prgprz0
-prginf0 ld (prgmsgb+1),hl
-        ld a,(prgbnknum)
+prginf0 ld (App_MsgBuf+1),hl
+        ld a,(App_BnkNum)
         ld c,a
-        ld (prgmsgb+3),bc
+        ld (App_MsgBuf+3),bc
         ld a,MSC_SYS_SYSWRN
-        ld (prgmsgb),a
-        ld ix,(prgprzn)
+        ld (App_MsgBuf),a
+        ld ix,(App_PrcID)
         db #dd:ld h,PRC_ID_SYSTEM
-        ld iy,prgmsgb
+        ld iy,App_MsgBuf
         rst #10
         ret
 
@@ -322,6 +227,57 @@ prgerr1 ld (prgmsgerra),hl
         ld hl,prgmsgerr
         jp prginf0
 
+;### PRGLNG -> load language pack
+prglng  ld hl,(App_BegCode)
+        ld de,App_BegCode
+        dec h
+        add hl,de               ;HL=code area end=path
+        ex de,hl
+        ld a,(App_BnkNum)
+        ld c,a
+        ld hl,texts_int
+        ld ix,256*0+9           ;default language=9 (english), pack=0
+        ld iyl,0                ;language-file version 0
+        jp SySystem_LNGLOD
+
+SySystem_LNGLOD
+        ld (App_MsgBuf+6),a
+        ld (App_MsgBuf+7),bc
+        ld (App_MsgBuf+8),hl
+        ld (App_MsgBuf+10),ix
+        ld (App_MsgBuf+12),iy
+        ld a,(App_BnkNum)
+        ld iyh,a
+        ld c,MSC_SYS_EXTFNC
+        ld l,FNC_DXT_LNGLOD
+        call SySystem_SendMessage
+SySLLo1 call SySystem_WaitMessage
+        cp MSR_SYS_EXTFNC
+        jr nz,SySLLo1
+        ld a,(App_MsgBuf+1)
+        ret
+SySystem_SendMessage
+        ld iy,App_MsgBuf
+        ld (iy+0),c
+        ld (App_MsgBuf+1),hl
+        ld (iy+3),a
+        ld (App_MsgBuf+4),de
+        db #dd:ld h,3       ;3 is the number of the system manager process
+        ld a,(App_PrcID)
+        db #dd:ld l,a
+        rst #10
+        ret
+SySystem_WaitMessage
+        ld iy,App_MsgBuf
+SySWMs1 db #dd:ld h,3       ;3 is the number of the system manager process
+        ld a,(App_PrcID)
+        db #dd:ld l,a
+        rst #08             ;wait for a system manager message
+        db #dd:dec l
+        jr nz,SySWMs1
+        ld a,(iy+0)
+        ret
+
 
 ;==============================================================================
 ;### SUB-ROUTINEN #############################################################
@@ -333,8 +289,8 @@ SySystem_HLPPTH1 ds 128
 SySHInX db ".HLP",0
 
 SySystem_HLPINI
-        ld hl,(prgcodbeg)
-        ld de,prgcodbeg
+        ld hl,(App_BegCode)
+        ld de,App_BegCode
         dec h
         add hl,de                   ;HL = CodeEnd = Command line
         ld de,SySystem_HLPPTH1
@@ -376,15 +332,15 @@ hlpopn  ld a,(SySystem_HLPFLG)
 ;### MSGGET -> Message für Programm abholen
 ;### Ausgabe    CF=0 -> keine Message vorhanden, CF=1 -> IXH=Absender, (recmsgb)=Message, A=(recmsgb+0), IY=recmsgb
 ;### Veraendert 
-msgget  ld a,(prgprzn)
+msgget  ld a,(App_PrcID)
         db #dd:ld l,a           ;IXL=Rechner-Prozeß-Nummer
         db #dd:ld h,-1
-        ld iy,prgmsgb           ;IY=Messagebuffer
+        ld iy,App_MsgBuf           ;IY=Messagebuffer
 msgget1 rst #08                 ;Message holen -> IXL=Status, IXH=Absender-Prozeß
         or a
         db #dd:dec l
         ret nz
-        ld iy,prgmsgb
+        ld iy,App_MsgBuf
         ld a,(iy+0)
         or a
         jp z,prgend
@@ -399,7 +355,7 @@ msgdsk  call msgget
         ld a,(dskprzn)
         db #dd:cp h
         jr nz,msgdsk            ;Message von anderem als Desktop-Prozeß -> ignorieren
-        ld a,(prgmsgb)
+        ld a,(App_MsgBuf)
         ret
 
 ;### MSGSND -> Message an Desktop-Prozess senden
@@ -409,9 +365,9 @@ msgsnd0 ld a,(prgwin)
 msgsnd2 ld c,MSC_DSK_WININH
 msgsnd  ld a,(dskprzn)
 msgsnd1 db #dd:ld h,a
-        ld a,(prgprzn)
+        ld a,(App_PrcID)
         db #dd:ld l,a
-        ld iy,prgmsgb
+        ld iy,App_MsgBuf
         ld (iy+0),c
         ld (iy+1),b
         ld (iy+2),e
@@ -456,48 +412,48 @@ strlen  push af
 ;### Eingabe    (SP)=Modul/Funktion, AF,BC,DE,HL,IX,IY=Register
 ;### Ausgabe    AF,BC,DE,HL,IX,IY=Register
 sysclln db 0
-syscll  ld (prgmsgb+04),bc      ;Register in Message-Buffer kopieren
-        ld (prgmsgb+06),de
-        ld (prgmsgb+08),hl
-        ld (prgmsgb+10),ix
-        ld (prgmsgb+12),iy
+syscll  ld (App_MsgBuf+04),bc      ;Register in Message-Buffer kopieren
+        ld (App_MsgBuf+06),de
+        ld (App_MsgBuf+08),hl
+        ld (App_MsgBuf+10),ix
+        ld (App_MsgBuf+12),iy
         push af
         pop hl
-        ld (prgmsgb+02),hl
+        ld (App_MsgBuf+02),hl
         pop hl
         ld e,(hl)
         inc hl
         ld d,(hl)
         inc hl
         push hl
-        ld (prgmsgb+00),de      ;Modul und Funktion in Message-Buffer kopieren
+        ld (App_MsgBuf+00),de      ;Modul und Funktion in Message-Buffer kopieren
         ld a,e
         ld (sysclln),a
-        ld iy,prgmsgb
-        ld ix,(prgprzn)
+        ld iy,App_MsgBuf
+        ld ix,(App_PrcID)
         db #dd:ld h,PRC_ID_SYSTEM
         rst #10                 ;Message senden
 syscll1 rst #30
-        ld iy,prgmsgb
-        ld ix,(prgprzn)
+        ld iy,App_MsgBuf
+        ld ix,(App_PrcID)
         db #dd:ld h,PRC_ID_SYSTEM
         rst #18                 ;auf Antwort warten
         db #dd:dec l
         jr nz,syscll1
-        ld a,(prgmsgb)
+        ld a,(App_MsgBuf)
         sub 128
         ld e,a
         ld a,(sysclln)
         cp e
         jr nz,syscll1
-        ld hl,(prgmsgb+02)      ;Register aus Message-Buffer holen
+        ld hl,(App_MsgBuf+02)      ;Register aus Message-Buffer holen
         push hl
         pop af
-        ld bc,(prgmsgb+04)
-        ld de,(prgmsgb+06)
-        ld hl,(prgmsgb+08)
-        ld ix,(prgmsgb+10)
-        ld iy,(prgmsgb+12)
+        ld bc,(App_MsgBuf+04)
+        ld de,(App_MsgBuf+06)
+        ld hl,(App_MsgBuf+08)
+        ld ix,(App_MsgBuf+10)
+        ld iy,(App_MsgBuf+12)
         ret
 
 ;### DIAINP -> Öffnet Dialog-Fenster zur Eingabe von Strings
@@ -528,7 +484,7 @@ diainp2 ld (diainpinp+2),a
 diainp7 ld a,1+128
         ld (de),a
         ld c,MSC_DSK_WINOPN     ;Fenster aufbauen
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         ld b,a
         call msgsnd
 diainp3 call msgdsk             ;Message holen -> IXL=Status, IXH=Absender-Prozeß
@@ -536,7 +492,7 @@ diainp3 call msgdsk             ;Message holen -> IXL=Status, IXH=Absender-Proze
         ret z                   ;kein Speicher für Fenster -> dann halt nicht
         cp MSR_DSK_WOPNOK
         jr nz,diainp3           ;andere Message als "Fenster geöffnet" -> ignorieren
-        ld a,(prgmsgb+4)
+        ld a,(App_MsgBuf+4)
         ld (diawin),a           ;Fenster wurde geöffnet -> Nummer merken
         inc a
         ld (prgwindat+windatsup),a
@@ -752,6 +708,15 @@ clcr163 sbc hl,bc
         or a
         ret
 
+;### STRCOP -> copies 0-terminated string
+;### Input      HL=source, DE=destination
+;### Output     DE=behind 0-terminator
+strcop  ld a,(hl)
+        ldi
+        or a
+        jr nz,strcop
+        ret
+
 
 ;==============================================================================
 ;### CONTROL FUNKTIONEN #######################################################
@@ -933,7 +898,7 @@ filopn9 inc hl
         jr filopn4
 filopn1 ld hl,cmdpth
 filopnb ld c,MSC_SYS_PRGRUN     ;*** Datei öffnen
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         ld d,a
         ld b,l
         ld e,h
@@ -1070,15 +1035,13 @@ filatrd push de                     ;*** Pfad holen
         pop de
         jp z,shwref1
         ld hl,cmdpth                ;*** Attribut setzen
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         xor a
         push de
         push hl
         push ix
-        call syscll                 ;C=0=ReadOnly, 1=Hidden, 2=System, 3=VolumeID, 4=Directory, 5=Archive, #0f=Longname
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRR           ;Datei-Eigenschaften lesen -> Attribute
+        call SyFile_DIRPRR          ;read attribs, C=0=ReadOnly, 1=Hidden, 2=System, 3=VolumeID, 4=Directory, 5=Archive, #0f=Longname
         pop ix
         pop hl
         pop de
@@ -1091,9 +1054,7 @@ filatrd push de                     ;*** Pfad holen
         push de
         push hl
         push ix
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRS           ;Datei-Eigenschaften setzen -> Attribute
+        call SyFile_DIRPRS          ;Datei-Eigenschaften setzen -> Attribute
         pop ix
         pop hl
         pop de
@@ -1107,9 +1068,7 @@ filatrd push de                     ;*** Pfad holen
         ld bc,(filatrm)
         ld de,(filatry)
         ld a,1
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRS           ;Datei-Eigenschaften setzen -> Timestamp
+        call SyFile_DIRPRS          ;Datei-Eigenschaften setzen -> Timestamp
         pop ix
         pop hl
         pop de
@@ -1124,11 +1083,10 @@ fildrv  ld a,(lstakt)
         jr z,fildrv1
         ld a,(pthdev2)
 fildrv1 call clcucs
-        ld (drvprptxt0+6),a
+        ld hl,(drvprptxt0a+1)
+        ld (hl),a
         ld c,0
-        call syscll                 ;A=Typ, B=Medium, C=Filesystem, D=Sektoren pro Cluster, IY,IX=Anzahl Cluster
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRINF
+        call SyFile_DIRINF          ;A=Typ, B=Medium, C=Filesystem, D=Sektoren pro Cluster, IY,IX=Anzahl Cluster
         jp c,filprp7
         ld a,b                      ;Medium
         and 127
@@ -1137,6 +1095,7 @@ fildrv1 call clcucs
         cp 16:ld hl,drvprptxt2c:jr z,fildrv2
         cp 17:ld hl,drvprptxt2d:jr z,fildrv2
         cp 18:ld hl,drvprptxt2e:jr z,fildrv2
+        cp 32:ld hl,drvprptxt2f:jr z,fildrv2
         ld hl,drvprptxt20
 fildrv2 ld (drvprpdsc2),hl
         ld a,c                      ;Filesystem
@@ -1146,6 +1105,7 @@ fildrv2 ld (drvprpdsc2),hl
         cp 16:ld hl,drvprptxt4d:jr z,fildrv3
         cp 17:ld hl,drvprptxt4e:jr z,fildrv3
         cp 18:ld hl,drvprptxt4f:jr z,fildrv3
+        cp 32:ld hl,drvprptxt4g:jr z,fildrv3
         ld hl,drvprptxt20
 fildrv3 ld (drvprpdsc4),hl
         rl b                        ;Wechseldatenträger
@@ -1168,18 +1128,17 @@ fildrv9 push iy:pop de
         ld (fildrvs+0),ix
         ld (fildrvs+2),de
         ld iy,drvprptxta
-        ld hl,drvprptxt62
+        ld hl,(drvprptxt62+1)
         call filprx9                ;IY=Ziel, HL=Anhang, DE,IX=Zahl
         ld hl,drvprptxt60
         ld (drvprpdsc6),hl          ;Belegt/Frei bisher unbekannt
         ld (drvprpdsc8),hl
         ld de,drvprpwin
         call diainp7                ;Fenster aufbauen
-        ld a,(drvprptxt0+6)
+        ld hl,(drvprptxt0a+1)
+        ld a,(hl)
         ld c,1
-        call syscll                 ;IY,IX=Gesamtanzahl Cluster, HL,DE=Anzahl freier 512B-Sektoren
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRINF
+        call SyFile_DIRINF          ;IY,IX=Gesamtanzahl Cluster, HL,DE=Anzahl freier 512B-Sektoren
         jr c,fildrv4
         push de:pop ix
         ex de,hl
@@ -1187,7 +1146,7 @@ fildrv9 push iy:pop de
         push de
         push ix
         ld iy,drvprptxt8            ;"Noch frei" eintragen
-        ld hl,drvprptxt62
+        ld hl,(drvprptxt62+1)
         call filprx9                ;IY=Ziel, HL=Anhang, DE,IX=Zahl
         or a
         ld hl,(fildrvs+0)
@@ -1199,7 +1158,7 @@ fildrv9 push iy:pop de
         sbc hl,bc
         ex de,hl
         ld iy,drvprptxt6            ;"Belegt" eintragen
-        ld hl,drvprptxt62
+        ld hl,(drvprptxt62+1)
         call filprx9                ;IY=Ziel, HL=Anhang, DE,IX=Zahl
         ld hl,drvprptxt6
         ld (drvprpdsc6),hl
@@ -1235,7 +1194,7 @@ filprp  ld e,7                  ;*** File Extensions holen
         add hl,bc
         ld de,filprpx
         ld bc,768
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         add a:add a:add a:add a
         inc a
         rst #20:dw jmp_bnkcop
@@ -1370,12 +1329,10 @@ filprx5 ld de,propertxt8
         ld bc,255
         ldir
         ld hl,cmdpth                ;*** Attribute
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         xor a
-        call syscll                 ;C=0=ReadOnly, 1=Hidden, 2=System, 3=VolumeID, 4=Directory, 5=Archive, #0f=Longname
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRR           ;Datei-Eigenschaften lesen -> Attributes
+        call SyFile_DIRPRR          ;Datei-Eigenschaften lesen -> Attributes, C=0=ReadOnly, 1=Hidden, 2=System, 3=VolumeID, 4=Directory, 5=Archive, #0f=Longname
         jr c,filprp7
         ld a,c
         ld (filprpa),a
@@ -1391,29 +1348,21 @@ filprx5 ld de,propertxt8
 filprp8 ld (propercon1),hl
         ld a,b:rr c:adc b:ld (properatr4),a
         ld hl,cmdpth                ;*** Timestamp Created
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         ld a,2
-        call syscll                 ;DE,BC=Timestamp
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRR           ;Datei-Eigenschaften lesen -> Date Created
+        call SyFile_DIRPRR          ;Datei-Eigenschaften lesen -> Date Created (DE,BC=Timestamp)
         jr c,filprp7
-        call syscll                 ;A=Sekunden, B=Minuten, C=Stunden, D=Tag (ab 1), E=Monat (ab 1), HL=Jahr
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILF2T
+        call SyFile_FILF2T          ;A=Sekunden, B=Minuten, C=Stunden, D=Tag (ab 1), E=Monat (ab 1), HL=Jahr
         ld iy,properdtm1+6
         call filprp9
         ld hl,cmdpth                ;*** Timestamp Modified
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         ld a,1
-        call syscll                 ;DE,BC=Timestamp
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRR           ;Datei-Eigenschaften lesen -> Date Created
+        call SyFile_DIRPRR          ;Datei-Eigenschaften lesen -> Date Created (DE,BC=Timestamp)
         jr c,filprp7
-        call syscll                 ;A=Sekunden, B=Minuten, C=Stunden, D=Tag (ab 1), E=Monat (ab 1), HL=Jahr
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILF2T
+        call SyFile_FILF2T          ;A=Sekunden, B=Minuten, C=Stunden, D=Tag (ab 1), E=Monat (ab 1), HL=Jahr
         ld iy,properdtm2+6
         call filprp9
         ld de,properwin
@@ -1439,9 +1388,7 @@ filprx9 push hl         ;IY=Ziel, HL=Anhang, DE,IX=Zahl
         db #fd:ld d,h
         inc de
         pop hl
-        ld bc,8
-        ldir
-        ret
+        jp strcop
 
 filprp0 call diainp4                ;*** File umbenennen und Attribute setzen
         ld ix,properatr1
@@ -1463,22 +1410,18 @@ filprpe ld a,(filprpa)
         and #ff-#27
         or c
         ld c,a
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         ld hl,cmdpth
         xor a
         push hl
         push ix
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRS           ;Datei-Eigenschaften setzen -> Attribute
+        call SyFile_DIRPRS          ;Datei-Eigenschaften setzen -> Attribute
         pop ix
         pop hl
         jp c,filprp7
         ld de,diainpbuf
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRREN           ;Datei/Verzeichnis umbenennen
+        call SyFile_DIRREN          ;Datei/Verzeichnis umbenennen
         jp shwref1
 
 ;### FILSPL -> Splittet File in mehrere Sub-Files auf
@@ -1490,7 +1433,7 @@ filsplo db 0                ;Flag, ob Ziel offen
 filspl  ld hl,256*47+64
         ld a,7
         call diainp8
-        ld iy,cmdcoptxt1
+        ld iy,(cmdcoptxt1+1)
         ld hl,splitttxt1
         ld bc,filspl0
         jp cmdcop0
@@ -1535,11 +1478,9 @@ filspl0 xor a                   ;*** Operation ausführen
         push hl
         call diaupd                 ;Pfad anzeigen
         pop hl
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILOPN
+        call SyFile_FILOPN
         jp c,filspla
         ld (prgcops),a
 
@@ -1589,9 +1530,7 @@ filspl6 ld (filspll),hl
         ld e,a
         ld hl,(prgcopa)
         ld a,(prgcops)
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILINP
+        call SyFile_FILINP
         jr c,filsple
         ld a,c
         or b
@@ -1607,12 +1546,10 @@ filspl6 ld (filspll),hl
         push hl
         call diaupd                 ;Pfad anzeigen
         pop hl
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         xor a
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILNEW
+        call SyFile_FILNEW
         jp c,filsplb
         ld (prgcopd),a
         ld a,1
@@ -1623,9 +1560,7 @@ filspl9 ld a,(prgcopb)              ;*** Ziel schreiben
         ld e,a
         ld hl,(prgcopa)
         ld a,(prgcopd)
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILOUT
+        call SyFile_FILOUT
         jr c,filsplc
         dec a
         ld a,24
@@ -1671,7 +1606,7 @@ filspl2 ex de,hl
         ret
 
 ;### FILCMB -> Fügt mehrere Files zu einem zusammen
-filcmb  ld iy,cmdcoptxt1
+filcmb  ld iy,(cmdcoptxt1+1)
         call cmdcop8
         jp z,prgprz0
         ld a,1
@@ -1910,7 +1845,7 @@ cmdcnc  jp prgprz0
 ;### CMDCOP -> Kopiert ein oder mehrere Files
 cmdcopm db 0        ;0=kopieren, 2=aneinanderhängen (1=Zwischenstatus -> Aneinanderhängen, Ziel bereits offen)
 cmdcopt db 0        ;0=kopieren, 1=bewegen
-cmdcop  ld iy,cmdcoptxt1
+cmdcop  ld iy,(cmdcoptxt1+1)
         ld bc,cmdcop1
         ld hl,cmdcoptxt
 cmdcop0 call cmdcop8
@@ -1919,6 +1854,7 @@ cmdcop9 ld de,cmdpth2           ;Dialog-Fenster aufbauen
         ld a,255
         call diainp
         jp prgprz0
+
 cmdcop8 push bc                 ;*** Copy-Fenster vorbereiten
         push hl
         push iy
@@ -1945,9 +1881,8 @@ cmdcop4 ld de,cmdpth2
         db #fd:ld e,l
         db #fd:ld d,h
         inc de
-        ld hl,cmdcoptxt2
-        ld bc,12
-        ldir
+        ld hl,(cmdcoptxt2+1)
+        call strcop
         pop hl
         pop bc
         ld a,1
@@ -1955,8 +1890,8 @@ cmdcop4 ld de,cmdpth2
         ret
 
 cmdcop1 xor a
-        ld (cmdcopt),a
-cmdcopz ld a,(cfgovr)
+cmdcopz ld (cmdcopt),a
+        ld a,(cfgovr)
         ld (cfgovrtmp),a
         call prgcop0            ;*** Operation ausführen
         jp c,prgprz0            ;Error -> Speicher voll
@@ -1983,20 +1918,22 @@ cmdcopz ld a,(cfgovr)
         ld (copmovdst),hl
         scf
         jr cmdcop3
-cmdcop2 ld a,(prgprzn)
+
+cmdcop2 ld a,(App_PrcID)    ;*** M A I N - L O O P
         db #dd:ld l,a           ;IXL=Rechner-Prozeß-Nummer
         ld a,(dskprzn)
         db #dd:ld h,a
-        ld iy,prgmsgb           ;IY=Messagebuffer
+        ld iy,App_MsgBuf        ;IY=Messagebuffer
         rst #18
         or a
         db #dd:dec l            ;Test, ob Cancel gedrückt wurde
         jr nz,cmdcop3
-        ld hl,(prgmsgb+8)
+        ld hl,(App_MsgBuf+8)
         ld bc,cmdcnc
         or a
         sbc hl,bc
         jp z,cmdcopb
+
         or a
 cmdcop3 call lstful             ;Quell-Pfad holen, ZF=0 -> Eintrag gefunden, (cmdpth)=voller Pfad, (diainpbuf)=Filename [0=Länge, 1-x=Name]
         jp z,cmdcopb
@@ -2005,9 +1942,9 @@ cmdcop3 call lstful             ;Quell-Pfad holen, ZF=0 -> Eintrag gefunden, (cm
         ld (cmdcnt),hl
         ld a,h
         ld b,l
-        ld c,0          ;A,BC=Counter*256
-        ld de,(cmdanz)  ;DE=Gesamt
-        call clcdiv     ;HL=Counter*256/Gesamt
+        ld c,0                  ;A,BC=Counter*256
+        ld de,(cmdanz)          ;DE=Gesamt
+        call clcdiv             ;HL=Counter*256/Gesamt
         ld a,l
         or h
         jr z,cmdcop7
@@ -2038,6 +1975,7 @@ cmdcopa ld e,4
         ld hl,cmdpth2
         cp (hl)
         jr nz,cmdcope
+
         ld de,cmdpth            ;*** MOVE-SOFT -> File/Dir bewegen
 cmdcopg ld a,(de)
         or a
@@ -2059,27 +1997,24 @@ cmdcopi call clcucs
         inc hl
         inc de
         jr cmdcopg
-cmdcoph ld a,(prgbnknum)
+cmdcoph ld a,(App_BnkNum)
         db #dd:ld h,a
         ld hl,(cmdpthz)
         ld (hl),0
         ld hl,cmdpth
         ld de,cmdpth2
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRMOV
+        call SyFile_DIRMOV
         jp c,cmdcopf
         jp cmdcop2
+
 cmdcope ld a,(cfgovrtmp)
         or a
         jr z,cmdcopj
-        ld a,(prgbnknum)        ;*** Test, ob Zielfile bereits existiert
+        ld a,(App_BnkNum)       ;*** Test, ob Zielfile bereits existiert
         db #dd:ld h,a
         ld hl,cmdpth2
         xor a
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRPRR
+        call SyFile_DIRPRR
         jr c,cmdcopj            ;nein -> weitermachen
         ld a,(cfgovrtmp)        ;ja -> test, ob immer skippen
         cp 2
@@ -2106,12 +2041,10 @@ cmdcov0 call diainp9            ;Overwrite-Fenster schließen
 cmdcopj ld a,(lstentt)
         or a
         jr z,cmdcopc
-        ld a,(prgbnknum)        ;*** Verzeichnis erstellen
+        ld a,(App_BnkNum)       ;*** Verzeichnis erstellen
         db #dd:ld h,a
         ld hl,cmdpth2
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRNEW
+        call SyFile_DIRNEW
         jr cmdcopd
 cmdcopc call prgcop             ;*** Datei kopieren
 cmdcopd jr c,cmdcopf
@@ -2125,6 +2058,7 @@ cmdcopf push af                 ;*** Fehler
         pop af
         call prgerr
         jr cmdcop6
+
 cmdcopb ld a,(cmdcopm)
         dec a
         call z,prgcop4
@@ -2164,22 +2098,19 @@ cmdmov  call lstanz
 cmdmov3 scf
         call lstful
         jp z,prgprz0
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         ld hl,cmdpth
         ld de,cmdpth2
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRREN       ;Datei/Verzeichnis umbenennen
+        call SyFile_DIRREN      ;Datei/Verzeichnis umbenennen
         jp nc,shwref1
         call prgerr
         jp prgprz0
-cmdmov2 ld iy,cmdmovtxt1        ;*** Move
+cmdmov2 ld iy,(cmdmovtxt1+1)    ;*** Move
         ld bc,cmdmov1
         ld hl,cmdmovtxt
         jp cmdcop0
 cmdmov1 ld a,1
-        ld (cmdcopt),a
         jp cmdcopz
 
 ;### CMDDEL -> Löscht selektierte Files
@@ -2188,7 +2119,7 @@ cmddel  call lstanz             ;*** Delete-Fenster vorbereiten
         push de
         pop ix                  ;Beschreibung vorbereiten
         ld de,0
-        ld iy,confrmtxt1a
+        ld iy,(confrmtxt1a+1)
         call clcn32
         ld de,confrmwin
         call diainp7
@@ -2204,16 +2135,13 @@ cmddel2 call lstful
         jr cmddel1
 cmddel5 ld a,(lstentt)          ;ja nach Typ File oder Dir löschen
         or a
-        ld a,FNC_FIL_DIRDEL
+        ld hl,SyFile_DIRDEL
         jr z,cmddel4
-        ld a,FNC_FIL_DIRRMD
-cmddel4 ld (cmddel3),a
-        ld a,(prgbnknum)
+        ld hl,SyFile_DIRRMD
+cmddel4 push hl
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         ld hl,cmdpth
-        call syscll
-        db MSC_SYS_SYSFIL
-cmddel3 db FNC_FIL_DIRDEL
         ret
 
 ;### CMDFOL -> Erstellt neues Verzeichnis
@@ -2239,11 +2167,9 @@ cmdfol2 ld de,diainpbuf
         push de
         call stradd
         pop hl
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DIRNEW       ;Verzeichnis erstellen
+        call SyFile_DIRNEW      ;Verzeichnis erstellen
         jp c,filprp7
         jp shwref1
 
@@ -2518,8 +2444,8 @@ cfgset7 push bc
 cfgnam  db "symcmder.ini",0:cfgnam0
 cfgpth  dw 0
 
-cfgini  ld hl,(prgcodbeg)
-        ld de,prgcodbeg
+cfgini  ld hl,(App_BegCode)
+        ld de,App_BegCode
         dec h
         add hl,de           ;HL=CodeEnde=Pfad
         ld (cfgpth),hl
@@ -2552,51 +2478,62 @@ cfgini4 ld hl,cfgnam        ;Programm-Filename mit Config-Filename ersetzen
         ld bc,cfgnam0-cfgnam
         ldir
         ld hl,(cfgpth)      ;Config-File öffnen
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILOPN
+        call SyFile_FILOPN
         ret c
-        ld de,(prgbnknum)   ;Config laden
+        ld de,(App_BnkNum)  ;Config laden
         ld hl,cfgbeg
         ld bc,cfgend-cfgbeg
         push af
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILINP
+        call SyFile_FILINP
         pop af              ;Config-File schließen
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILCLO
+        call SyFile_FILCLO
         ret
 
 ;### CFGSAV -> Speichert Config-Datei
 cfgsav  ld hl,(cfgpth)      ;Config-File öffnen
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         xor a
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILNEW
+        call SyFile_FILNEW
         jp c,prgprz0
-        ld de,(prgbnknum)   ;Config speichern
+        ld de,(App_BnkNum)  ;Config speichern
         ld hl,cfgbeg
         ld bc,cfgend-cfgbeg
         push af
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILOUT
+        call SyFile_FILOUT
         pop af              ;Config-File schließen
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILCLO
+        call SyFile_FILCLO
         jp prgprz0
 
 
 ;==============================================================================
 ;### INIT ROUTINEN ############################################################
 ;==============================================================================
+
+;### SYSINI -> system specific initialization
+sysini  ld hl,#8139:rst #28     ;get screen resolution
+        ld bc,-300
+        add iy,bc
+        jr nc,sysini1
+        ld hl,301               ;high y size -> increase ysize (##!!## does that makes sense or should this be a OS/GUI function?)
+        ld (prgwindat+10),hl
+        ld (prgwindat+18),hl
+sysini1 ld hl,jmp_sysinf        ;get hardware flags
+        ld de,256*1+5
+        ld ix,cfghrdflg
+        ld iy,77
+        rst #28
+        ld a,(cfghrdflg)
+        bit 4,a
+        ret z
+        ld hl,113*2+300         ;long filenames -> increase name column
+        ld (prgwindat+08),hl
+        ld (prgwindat+16),hl
+        ld a,63+80
+        ld (lsttab1+2),a
+        ret
 
 ;### DEVINI -> Device-Dropdowns initialisieren
 devini  ld hl,jmp_sysinf
@@ -2863,7 +2800,7 @@ lstswp0 call shwnam0        ;*** Menu an Sortierung anpassen
         rlca
         rlca
         and 2
-        add 1
+        add 1+32
         ld ix,prgwinmen4+2
         ld (ix+64),a                ;Sort-Reihenfolge anpassen
         ld a,c
@@ -2871,10 +2808,10 @@ lstswp0 call shwnam0        ;*** Menu an Sortierung anpassen
         inc a
         ld b,3
         ld de,8
-lstswp1 ld (ix+32),1                ;Sort-Spalte anpassen
+lstswp1 ld (ix+32),1+32             ;Sort-Spalte anpassen
         dec a
         jr nz,lstswp2
-        ld (ix+32),1+2
+        ld (ix+32),1+2+32
 lstswp2 add ix,de
         djnz lstswp1
         ret
@@ -2901,7 +2838,7 @@ lstanz3 ld a,e
 
 ;### LSTFUL -> Holt nächsten vollen File-Pfad aus aktueller Liste
 ;### Eingabe    CF=1 -> von vorne starten
-;### Ausgabe    ZF=0 -> Eintrag gefunden, (cmdpth)=voller Pfad, (diainpbuf)=Filename [0=Länge, 1-x=Name]
+;### Ausgabe    ZF=0 -> Eintrag gefunden, (cmdpth)=voller Pfad, (diainpbuf)=Filename [0=Länge, 1-x=Name], (lstentt)=1 Directory
 lstful  ld a,1
         call lstnxt
         ret z
@@ -3254,7 +3191,9 @@ lstget1 add 5
 ;### Veraendert AF,BC,DE,HL,IX,IY
 lsttab  dw 0,0, 00 ,0,256*64+3, 00 ,0,3
 lsttab1 dw 4*0+0,63,00,0, 4*3+1,41,00,0, 4*0+0,69,00,0
-lsttab3 db "Name",0,      "Size",0,      "Date",0:lsttab2
+lsttab3 ds 30
+lsttab2
+
 lstlen  dw 0
 
 lstbnk1 db 0    ;Bank             der linken  Tabelle
@@ -3308,7 +3247,15 @@ lstini7 ld a,(lstbnk2)              ;reservierten Speicher fürs Betriebssystem m
         ld (5*1+prgmemtab+1),hl
         ret
 ;CF=0 ok -> lstbnk2/lstadr2/lstdat2=Adresse von reserviertem Speicher, lstlen=Länge von Transferspeicher
-lstini1 ld hl,(cfglin)
+lstini1 ld hl,(lsttab3d+1)
+        ld de,(lsttab3a+1)
+        sbc hl,de
+        ld c,l:ld b,h
+        ex de,hl
+        ld de,lsttab3
+        ldir
+
+        ld hl,(cfglin)
         add hl,hl
         add hl,hl
         add hl,hl
@@ -3360,17 +3307,21 @@ lstini5 ld (lstdat2),hl         ;Speicher erfolgreich reserviert -> Adresse von 
         ld (lsttab+10),hl       ;SpaltenInfo-Zeiger setzen
         ld bc,lsttab3-lsttab1
         add hl,bc               ;HL=Adresse des ersten Spaltentitels
-        ld a,3
+        ld b,3
         ld ix,lsttab1
         ld d,0
+        ld iy,lsttab3a
 lstini6 ld (ix+4+0),l           ;SpaltenName-Zeiger setzen
         ld (ix+4+1),h
-        ld e,5
+        ld a,(iy+4)
+        sub (iy+1)
+        ld e,a
         add hl,de
         ld e,8
         add ix,de
-        dec a
-        jr nz,lstini6
+        ld e,3
+        add iy,de
+        djnz lstini6
         pop de
         ld a,(lstbnk2)
         ld hl,prgbnk
@@ -3378,7 +3329,7 @@ lstini6 ld (ix+4+0),l           ;SpaltenName-Zeiger setzen
         rlca:rlca:rlca:rlca
         ld hl,lsttab
         ld bc,lsttab2-lsttab
-        rst #20:dw jmp_bnkcop       ;tabellen-objekt kopieren
+        rst #20:dw jmp_bnkcop   ;tabellen-objekt kopieren
         or a
         ret
 
@@ -3424,9 +3375,7 @@ lstref1 ld (lstref4+2),hl
         or (hl)             ;A4-7=eigene Bank=Pfadbank
         pop hl              ;HL=Pfad
         ld iy,0
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_DEVDIR   ;Verzeichnis laden
+        call SyFile_DEVDIR  ;Verzeichnis laden
         pop de              ;D=Control
         jr c,lstref2
         ld c,l              ;Anzahl Zeilen eintragen
@@ -3566,12 +3515,10 @@ prgcops db 0    ;Source-Handler
 prgcopd db 0    ;Destination-Handler
 
 prgcop  ld hl,cmdpth                ;*** Quelle öffnen
-        ld a,(prgbnknum)
+        ld a,(App_BnkNum)
         db #dd:ld h,a
         push ix
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILOPN
+        call SyFile_FILOPN
         pop ix
         jp c,prgcope
         ld (prgcops),a
@@ -3583,9 +3530,7 @@ prgcop  ld hl,cmdpth                ;*** Quelle öffnen
         ld (cmdcopm),a
 prgcopc ld hl,cmdpth2 
         xor a
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILNEW
+        call SyFile_FILNEW
         jr c,prgcop7
         ld (prgcopd),a
 
@@ -3594,9 +3539,7 @@ prgcop5 ld a,(prgcopb)              ;*** Source lesen
         ld hl,(prgcopa)
         ld bc,(cfgbuf)
         ld a,(prgcops)
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILINP
+        call SyFile_FILINP
         jr c,prgcop6
         ld a,c
         or b
@@ -3605,9 +3548,7 @@ prgcop5 ld a,(prgcopb)              ;*** Source lesen
         ld e,a
         ld hl,(prgcopa)
         ld a,(prgcopd)
-        call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILOUT
+        call SyFile_FILOUT
         jr c,prgcop6
         dec a
         ld a,24
@@ -3631,9 +3572,7 @@ prgcop7 push af                     ;nur source schließen
         jr prgcop8
 
 prgcop3 ld a,(prgcops)              ;*** Source schließen
-prgcon9 call syscll
-        db MSC_SYS_SYSFIL
-        db FNC_FIL_FILCLO
+prgcon9 call SyFile_FILCLO
         ret
 prgcop4 ld a,(prgcopd)              ;*** Destination schließen
         jr prgcon9
@@ -3668,10 +3607,377 @@ prgcope push af
 
 
 ;==============================================================================
+;### TREE PROCESSING ##########################################################
+;==============================================================================
+
+;-----------------------------------
+;copy files in nested subdirectories
+;-----------------------------------
+;pathsrc = source      path
+;pathdst = destination path
+;
+;dim filepos(20)
+;depth = 0
+;
+;filepos(depth) = 0
+;entries = getdir(pathsrc)
+;
+;doit = true
+;while doit
+;    if len(entries) > filepos(depth):
+;        file = entries(filepos(depth))
+;        filepos(depth) = filepos(depth) + 1
+;        if file.typ = file:
+;            copy(pathsrc + "/" + file.name, pathdst + "/" + file.name)
+;        else if file.typ = dir:
+;            mkdir(pathdst + "/" + file.name)
+;            pathsrc = pathsrc + "/" + file.name
+;            pathdst = pathdst + "/" + file.name
+;            depth = depth + 1
+;            filepos(depth) = 0
+;            entries = getdir(pathsrc)
+;        endif
+;    else:
+;        ##remove all files in pathsrc, if this is a move command##
+;        if depth > 0:
+;            pathsrc = go_parent(pathsrc)
+;            pathdst = go_parent(pathdst)
+;            depth = depth - 1
+;            entries = getdir(pathsrc)
+;        else:
+;            doit = false
+;        endif
+;    endif
+;wend
+;-----------------------------------
+
+tretst1 db "c:\test1\test2\",0
+tretst2 db "c:\test3\",0
+
+tretst  ld hl,tretst1
+        ld de,trebrnsrc
+        ld bc,256
+        ldir
+        ld hl,tretst2
+        ld de,trebrndst
+        ld bc,256
+        ldir
+        ld a,3
+        ld (tremulmod),a
+        call trebrn
+        ret
+
+;### TREMUL -> counts, copies, moves or deletes a selection of files and directories
+;### Input      A=mode (0=copy, 1=move, 2=delete, 3=count), ...src/dst list...
+;### Output     ...
+;### Destroyed  AF,BC,DE,HL,IX,IY
+tremulmod   db 0            ;0=copy, 1=move, 2=delete, 3=count
+trelstcnt   dw 0            ;number of selected list entries
+trecurcnt   dw 0            ;current number of processed files and directories
+trecursiz   ds 4            ;current size of processed files
+treallcnt   dw 0            ;total number of all files and directories
+treallsiz   ds 4            ;total size of all files
+
+tremul  ld (tremulmod),a
+        call lstanz         ;DE=count, ZF=1 -> nothing selected
+        ret z
+        ld (trelstcnt),de
+        ld hl,0
+        ld (trecurcnt),hl
+        ld (trecursiz+0),hl
+        ld (trecursiz+2),hl
+
+        ld a,(lstakt)           ;prepare destination path
+        or a
+        ld hl,pthdev2
+        jr z,tremul1
+        ld hl,pthdev1
+tremul1 ld de,cmdpth2
+        ld bc,256
+        push de
+        ldir                    ;cmdpth2=destination path
+        pop hl
+        call strlen
+        ld (cmdpthz),hl         ;end of dst-path
+
+        or a
+tremul2 call lstful             ;ZF=0 -> source entry found, (cmdpth)=full source path, (diainpbuf)=filename [0=length, 1-x=name], (lstentt)=1 is directory
+        ;jr nz,...end
+        ld a,(lstentt)
+        or a
+        ;jr nz,...directory
+
+
+
+;### TREBRN -> counts, copies, moves or deletes one sub-directory tree
+;### Input      trebrnsrc=source path, trebrndst=destination path, (tremulmod)=mode (0=copy, 1=move, 2=delete, 3=count)
+;### Output     CF=0 -> ok, (trebrncnt)+=num_files+num_directories
+;###            CF=1 -> error, A=type (1=disc, ...)
+;### Destroyed  AF,BC,DE,HL,IX,IY
+trebrnsrc   ds 256          ;current source      path (including last "/")
+trebrnsln   db 0,0          ;length  source      path (without 0)
+trebrndst   ds 256          ;current destination path (including last "/")
+trebrndln   db 0,0          ;length  destination path (without 0)
+
+trebrnpos   ds 32*2         ;position array per depth
+trebrndpt   db 0,0          ;depth
+
+trebrnmax   equ 1024
+trebrndir   ds trebrnmax    ;directory buffer
+trebrncnt   dw 0            ;number of loaded directory entries
+trebrnofs   dw 0            ;directory offset
+trebrnent   dw 0            ;address of current entry
+
+trebrn  ld hl,trebrnsrc
+        call strlen
+        ld a,c
+        ld (trebrnsln),a
+        ld hl,trebrndst
+        call strlen
+        ld a,c
+        ld (trebrndln),a
+        xor a
+trebrn1 call trepos             ;set new depth and reset file position
+trebrn2 ld hl,0                 ;reset new directory values
+        ld (trebrnofs),hl
+        ld (trebrncnt),hl
+trebrn3 ld a,(trebrndpt)
+        call trepos0
+        ld e,(hl)
+        inc hl
+        ld d,(hl)
+        inc de                  ;increase position for this depth
+        ld (hl),d
+        dec hl
+        ld (hl),e
+        dec de
+        call tredir             ;get next directory entry, a=attributes
+        jp c,trebrne
+        jr z,trebrn5            ;no more entries -> finish this directory
+        cp -1
+        jr z,trebrn3            ;is ".." -> ignore it
+        ld hl,(trecurcnt)
+        inc hl
+        ld (trecurcnt),hl
+        bit 4,a
+        jr z,trebrn4            ;is file -> copy it
+
+        call treadd         ;*** entry is directory
+        ;jr z,path too long
+        ld (trebrndln),a        ;update srcpthlen
+        ld a,b
+        ld (trebrnsln),a        ;update dstpthlen
+        ld (hl),0
+        dec hl
+        ld (hl),"\"
+        push de
+        ld a,(tremulmod)
+        cp 2
+        ld hl,trebrndst
+        ld ix,(App_BnkNum-1)
+        ;call c,SyFile_DIRNEW    ;create destination directory (if copy or move)
+        pop hl
+        ;ld a,reason
+        ;ret c
+        dec hl
+        ld (hl),"\"
+        ld a,(trebrndpt)
+        inc a                   ;increase depth
+        jr trebrn1              ;continue in subdir
+
+trebrn4 ld hl,(trebrnent)   ;*** entry is file
+        ld c,(hl):inc hl:ld b,(hl)
+        inc hl
+        ex de,hl
+        ld hl,(trecursiz+0):add hl,bc:ld (trecursiz+0),hl
+        ex de,hl                ;add filesize
+        ld c,(hl):inc hl:ld b,(hl)
+        ld hl,(trecursiz+2):adc hl,bc:ld (trecursiz+2),hl
+        ld a,(tremulmod)
+        cp 2
+        jr nc,trebrn3           ;delete/count -> next one
+
+        call treadd
+        ;jr z,path too long
+        ld hl,trebrnsrc
+        ld de,trebrndst
+        ;call ...filcop          ;copy/move -> copy file
+        ;ld a,reason
+        ;ret c
+        jr trebrn3
+
+trebrn5 ld a,(tremulmod)    ;*** finish directory
+        or a
+        jr z,trebrn7            ;copy -> don't touch directory
+        cp 3
+        jr nz,trebrn6
+        ;call ...show_count     ;count -> update display
+        jr trebrn7
+trebrn6 ;...delall              ;move/delete -> delete all files and subdirs
+trebrn7 ld a,(trebrndpt)
+        or a
+        ret z
+        dec a                   ;decrease depth
+        ld (trebrndpt),a
+        ld hl,trebrnsrc
+        ld bc,trebrnsln
+        call trepar
+        ld hl,trebrndst
+        ld bc,trebrndln
+        call trepar
+        jp trebrn2
+
+trebrne ld a,1              ;*** disc error
+        ret
+
+;### TREDIR -> get directory entry
+;### Input      DE=number
+;### Output     CF=1 -> error
+;###            CF=0 -> (trebrnsrc)=full entry path, (trebrnent)=entry data, A=attributes+128 (255=".."), ZF=1 no more entry
+;### Destroyed  AF,BC,DE,HL,IX,IY
+tredir  ld hl,(trebrnofs)
+        ex de,hl
+        or a
+        sbc hl,de           ;hl=number starting from current offset
+tredir1 ld b,l
+        ld de,(trebrncnt)
+        sbc hl,de
+        jr nc,tredir6       ;not here -> load more entries
+        ld hl,trebrndir
+        ld de,4+2+2+1       ;(4len+2date+2time+1atr)
+        xor a
+        inc b
+tredir2 dec b
+        jr z,tredir4        ;get entry at HL
+        add hl,de
+tredir3 cp (hl)             ;skip entry
+        inc hl
+        jr nz,tredir3
+        jr tredir2
+tredir4 ld (trebrnent),hl   ;get entry
+        ld e,4+2+2+2
+        add hl,de           ;hl=name second char
+        ld a,"."
+        cp (hl)             ;check for ".."
+        dec hl
+        jr nz,tredir9
+        sub (hl)
+        jr nz,tredir9       ;skip ".." entry
+        dec a
+        jr tredira
+tredir9 dec hl
+        ld a,(hl)           ;a=attributes
+        inc hl
+tredira ex de,hl
+        ld bc,(trebrnsln)
+        ld hl,trebrnsrc
+        add hl,bc           ;hl=source path behind "/"
+        ex de,hl
+tredir5 inc (hl):dec (hl)
+        ldi
+        jr nz,tredir5
+        or 128
+        ret
+
+tredir6 push hl             ;load more entries
+        ld hl,(trebrnofs)
+        add hl,de
+        ld (trebrnofs),hl
+        push hl:pop iy
+        ld hl,trebrnsrc
+
+        push hl
+        ld bc,(trebrnsln)
+        add hl,bc
+        ld a,(hl)
+        ld (tredir7+1),a
+        ld (hl),0           ;terminate path
+        ex (sp),hl
+
+        ld a,(App_BnkNum)
+        ld ixh,a
+        ld ixl,8            ;no volume IDs
+        ld de,trebrndir
+        ld bc,trebrnmax
+        call SyFile_DIRINP
+        ld (trebrncnt),hl
+        ex de,hl
+        pop hl
+tredir7 ld (hl),0           ;restore path
+        pop hl
+        ret c
+        ld a,e:or d
+        ret z
+        jr tredir1
+
+;### TREPOS -> set new tree depth and reset file position
+;### Input      A=new depth
+;### Destroyed  AF,BC,HL
+trepos  ld (trebrndpt),a
+        call trepos0
+        ld (hl),b
+        inc hl
+        ld (hl),b
+        ret
+trepos0 add a
+        ld c,a
+        ld b,0
+        ld hl,trebrnpos
+        add hl,bc
+        ret
+
+;### TREADD -> add source filename to destination path
+;### Input      trebrnsrc=source path with additional filename
+;### Output     ZF=1 -> error, path too long
+;###            ZF=0 -> trebrndst=full path of destination, B=new srcpthlen, A=new dstpthlen, DE=behind trebrndst path/new+0, HL=behind trebrnsrc+0
+;### Destroyed  F,C,DE,HL
+treadd  ld hl,trebrndst
+        ld a,(trebrndln)        ;a=old dstpthlen
+        ld c,a
+        ld b,0
+        add hl,bc
+        ex de,hl                ;de=behind last dst-"/"
+        ld hl,trebrnsrc
+        ld bc,(trebrnsln)
+        add hl,bc               ;hl=behind last src-"/"
+        ld b,c                  ;b=old srcpthlen
+        ld c,-1
+treadd1 inc b
+        ret z
+        inc a
+        ret z
+        inc (hl):dec (hl)
+        ldi
+        jr nz,treadd1
+        or a
+        ret
+
+;### TREPAR -> go to parent directory
+;### Input      HL=path, (BC)=current length
+;### Output     length updated
+;### Destroyed  AF,BC,DE,HL
+trepar  ld a,(bc)
+        ld e,a
+        ld d,0
+        add hl,de
+        dec hl
+trepar1 dec e
+        dec hl
+        ld a,(hl)
+        cp "\"
+        jr z,trepar2
+        cp "/"
+        jr nz,trepar1
+trepar2 ld a,e
+        ld (bc),a
+        ret
+
+
+;==============================================================================
 ;### DATEN-TEIL ###############################################################
 ;==============================================================================
 
-prgdatbeg
+App_BegData
 
 prgicn16c db 12,24,24:dw $+7:dw $+4,12*24:db 5
 db #66,#66,#68,#88,#88,#88,#88,#88,#88,#66,#66,#61,#65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51,#65,#51,#58,#66,#66,#66,#66,#66,#68,#56,#55,#51,#65,#51,#58,#88,#88,#88,#88,#88,#88,#56,#55,#51
@@ -3695,9 +4001,9 @@ pthdev1 db "A:"
 pthdir1 db "\"
         ds 256-2-1
 pthful1 ds 256
-pthmsk1 db "*.*"
+pthmsk1 db "*.*"        ;current file mask
         ds 9-3
-pthcst1 db "*.exe"
+pthcst1 db "*.exe"      ;custom mask
         ds 9-5
 
 pthlen2 db 1
@@ -3711,15 +4017,30 @@ pthcst2 db "*.exe"
         ds 9-5
 
 cfgovr  db 1        ;Flag, ob bei Überschreiben fragen
+cfgcnt  db 1        ;Flag, if count file numbers and sizes before copy/move/delete
 
 cfgend              ;**Ende Config**
 
+;==============================================================================
+;%%% MULTI LANGUAGE TEXTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;==============================================================================
+
+texts_int
+read"App-Commander-Texts.asm"
+texts_int_end
+
+list
+texts_int_len   equ texts_int_end-texts_int
+nolist
+
 ;### Verschiedenes
-prgmsginf1 db "SymCOMMANDER",0
-prgmsginf2 db " Version 1.7 (Build "
+prgwintit   db "SymCommander 2.0",0
+
+prgmsginf1  db "SymCOMMANDER",0
+prgmsginf2 db " Version 2.0 (Build "
 read "..\..\..\SRC-Main\build.asm"
             db "pdt)",0
-prgmsginf3 db " Copyright <c> 2025 SymbiosiS",0
+prgmsginf3  db " Copyright <c> 2025 SymbiosiS",0
 
 prgmsgerr1  db "Disc error (Code "
 prgmsgerr1a db "##):"
@@ -3731,60 +4052,16 @@ prgmsgerrtb dw prgmsgerr00,prgmsgerr01,prgmsgerr02,prgmsgerr03,prgmsgerr04,prgms
             dw prgmsgerr30,prgmsgerr31,prgmsgerr32
 prgmsgerrmx equ 32
 
-prgmsgerr00 db "Device does not exist",0
-prgmsgerr01 db "OK",0
-prgmsgerr02 db "Device not initialised",0
-prgmsgerr03 db "Media is damaged",0
-prgmsgerr04 db "Partition does not exist",0
-prgmsgerr05 db "Unsupported media or partition",0
-prgmsgerr06 db "Error while sector read/write",0
-prgmsgerr07 db "Error while positioning",0
-prgmsgerr08 db "Abort while volume access",0
-prgmsgerr09 db "Unknown volume error",0
-prgmsgerr10 db "No free filehandler",0
-prgmsgerr11 db "Device does not exist",0
-prgmsgerr12 db "Path does not exist",0
-prgmsgerr13 db "File does not exist",0
-prgmsgerr14 db "Access is forbidden",0
-prgmsgerr15 db "Invalid path or filename",0
-prgmsgerr16 db "Filehandler does not exist",0
-prgmsgerr17 db "Device slot already occupied",0
-prgmsgerr18 db "Error in file organisation",0
-prgmsgerr19 db "Invalid destination name",0
-prgmsgerr20 db "File/path already exist",0
-prgmsgerr21 db "Wrong sub command code",0
-prgmsgerr22 db "Wrong attribute",0
-prgmsgerr23 db "Directory full",0
-prgmsgerr24 db "Media full",0
-prgmsgerr25 db "Media is write protected",0
-prgmsgerr26 db "Device is not ready",0
-prgmsgerr27 db "Directory is not empty",0
-prgmsgerr28 db "Invalid destination device",0
-prgmsgerr29 db "Not supported by file system",0
-prgmsgerr30 db "Unsupported device",0
-prgmsgerr31 db "File is read only",0
-prgmsgerr32 db "Device channel is not available",0
-prgmsgerru  db "*Undefined Error*",0
-prgmsgerrs  db "*Unknown Error*",0
-
-prgwintit   db "SymCommander 1.7",0
-
-prgtxtok    db "Ok",0
-prgtxtcnc   db "Cancel",0
-prgtxtyes   db "Yes",0
-prgtxtno    db "No",0
-
 ;### Menues
 menicn_null         db 4,8,1:dw $+7,$+4,4:db 5: db #66,#66,#66,#66
 
-prgwinmentx1 db "Files",0
-prgwinmen1tx1 db 6,128,-1:dw menicn_fileopen    +1:db " Open",0
-prgwinmen1tx2 db 6,128,-1:dw menicn_attributes  +1:db " Change Attributes...",0
-prgwinmen1tx3 db 6,128,-1:dw menicn_properties  +1:db " Properties",0
-prgwinmen1tx4 db 6,128,-1:dw menicn_driveinfo   +1:db " Drive information",0
-prgwinmen1tx5 db 6,128,-1:dw menicn_filesplit   +1:db " Split File...",0
-prgwinmen1tx6 db 6,128,-1:dw menicn_filecombine +1:db " Combine Files...",0
-prgwinmen1tx7 db 6,128,-1:dw menicn_quit        +1:db " Quit",0
+prgwinmen1tx1 db 6,128,-1:dw menicn_fileopen    +1:db 7:dw prgwinmen1tx1_poi:db 0
+prgwinmen1tx2 db 6,128,-1:dw menicn_attributes  +1:db 7:dw prgwinmen1tx2_poi:db 0
+prgwinmen1tx3 db 6,128,-1:dw menicn_properties  +1:db 7:dw prgwinmen1tx3_poi:db 0
+prgwinmen1tx4 db 6,128,-1:dw menicn_driveinfo   +1:db 7:dw prgwinmen1tx4_poi:db 0
+prgwinmen1tx5 db 6,128,-1:dw menicn_filesplit   +1:db 7:dw prgwinmen1tx5_poi:db 0
+prgwinmen1tx6 db 6,128,-1:dw menicn_filecombine +1:db 7:dw prgwinmen1tx6_poi:db 0
+prgwinmen1tx7 db 6,128,-1:dw menicn_quit        +1:db 7:dw prgwinmen1tx7_poi:db 0
 
 menicn_fileopen     db 4,8,7:dw $+7,$+4,28:db 5: db #61,#16,#66,#66, #18,#81,#16,#66, #18,#88,#77,#77, #18,#87,#22,#27, #18,#72,#22,#76, #17,#22,#27,#66, #77,#77,#76,#66
 menicn_attributes   db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#61,#16, #66,#00,#01,#11, #60,#88,#11,#01, #60,#88,#11,#06, #11,#81,#18,#06, #61,#11,#18,#06, #66,#11,#00,#66
@@ -3794,13 +4071,12 @@ menicn_filesplit    db 4,8,7:dw $+7,$+4,28:db 5: db #68,#8f,#f8,#86, #68,#ff,#ff
 menicn_filecombine  db 4,8,7:dw $+7,$+4,28:db 5: db #68,#99,#99,#86, #68,#89,#98,#86, #68,#88,#88,#86, #11,#11,#11,#11, #68,#88,#88,#86, #68,#89,#98,#86, #68,#99,#99,#86
 menicn_quit         db 4,8,7:dw $+7,$+4,28:db 5: db #11,#16,#16,#66, #14,#46,#11,#66, #14,#11,#1e,#16, #14,#1e,#ee,#e1, #14,#11,#1e,#16, #14,#46,#11,#66, #11,#16,#16,#66
 
-prgwinmentx2 db "Mark",0
-prgwinmen2tx1 db 6,128,-1:dw menicn_selectadd   +1:db " Select Group...",0
-prgwinmen2tx2 db 6,128,-1:dw menicn_selectremove+1:db " Unselect Group...",0
-prgwinmen2tx3 db 6,128,-1:dw menicn_selectall   +1:db " Select All",0
-prgwinmen2tx4 db 6,128,-1:dw menicn_selectnone  +1:db " Unselect All",0
-prgwinmen2tx5 db 6,128,-1:dw menicn_selectinvert+1:db " Invert Selection",0
-prgwinmen2tx6 db 6,128,-1:dw menicn_null        +1:db " Compare Directories",0
+prgwinmen2tx1 db 6,128,-1:dw menicn_selectadd   +1:db 7:dw prgwinmen2tx1_poi:db 0
+prgwinmen2tx2 db 6,128,-1:dw menicn_selectremove+1:db 7:dw prgwinmen2tx2_poi:db 0
+prgwinmen2tx3 db 6,128,-1:dw menicn_selectall   +1:db 7:dw prgwinmen2tx3_poi:db 0
+prgwinmen2tx4 db 6,128,-1:dw menicn_selectnone  +1:db 7:dw prgwinmen2tx4_poi:db 0
+prgwinmen2tx5 db 6,128,-1:dw menicn_selectinvert+1:db 7:dw prgwinmen2tx5_poi:db 0
+prgwinmen2tx6 db 6,128,-1:dw menicn_null        +1:db 7:dw prgwinmen2tx6_poi:db 0
 
 menicn_selectadd    db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#6f,#f6,#66, #ff,#ff,#f6,#66, #6f,#ff,#66,#66, #ff,#ff,#f6,#66, #ff,#6f,#f6,#96, #66,#66,#69,#99, #66,#66,#66,#96
 menicn_selectremove db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#6f,#f6,#66, #ff,#ff,#f6,#66, #6f,#ff,#66,#66, #ff,#ff,#f6,#66, #ff,#6f,#f6,#66, #66,#66,#63,#33, #66,#66,#66,#66
@@ -3809,16 +4085,15 @@ menicn_selectnone   db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #68,#86,#68
 menicn_selectinvert db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#6f,#f6,#66, #ff,#ff,#f6,#66, #6f,#ff,#66,#66, #ff,#ff,#f6,#66, #ff,#6f,#f1,#11, #66,#66,#61,#18, #66,#66,#61,#88
 ;     _comparedirs
 
-prgwinmentx3 db "Commands",0
-prgwinmen3tx1 db 6,128,-1:dw menicn_copy        +1:db " Copy Files...",0
-prgwinmen3tx2 db 6,128,-1:dw menicn_move        +1:db " Move Files...",0
-prgwinmen3tx3 db 6,128,-1:dw menicn_delete      +1:db " Delete Files",0
-prgwinmen3tx4 db 6,128,-1:dw menicn_folder      +1:db " New Folder...",0
-prgwinmen3tx5 db 6,128,-1:dw menicn_fileview    +1:db " View File",0
-prgwinmen3tx6 db 6,128,-1:dw menicn_fileedit    +1:db " Edit File",0
-prgwinmen3tx7 db 6,128,-1:dw menicn_find        +1:db " Search...",0
-prgwinmen3tx8 db 6,128,-1:dw menicn_dirswap     +1:db " Source <-> Target",0
-prgwinmen3tx9 db 6,128,-1:dw menicn_dirsame     +1:db " Target = Source",0
+prgwinmen3tx1 db 6,128,-1:dw menicn_copy        +1:db 7:dw prgwinmen3tx1_poi:db 0
+prgwinmen3tx2 db 6,128,-1:dw menicn_move        +1:db 7:dw prgwinmen3tx2_poi:db 0
+prgwinmen3tx3 db 6,128,-1:dw menicn_delete      +1:db 7:dw prgwinmen3tx3_poi:db 0
+prgwinmen3tx4 db 6,128,-1:dw menicn_folder      +1:db 7:dw prgwinmen3tx4_poi:db 0
+prgwinmen3tx5 db 6,128,-1:dw menicn_fileview    +1:db 7:dw prgwinmen3tx5_poi:db 0
+prgwinmen3tx6 db 6,128,-1:dw menicn_fileedit    +1:db 7:dw prgwinmen3tx6_poi:db 0
+prgwinmen3tx7 db 6,128,-1:dw menicn_find        +1:db 7:dw prgwinmen3tx7_poi:db 0
+prgwinmen3tx8 db 6,128,-1:dw menicn_dirswap     +1:db 7:dw prgwinmen3tx8_poi:db 0
+prgwinmen3tx9 db 6,128,-1:dw menicn_dirsame     +1:db 7:dw prgwinmen3tx9_poi:db 0
 
 menicn_copy         db 4,8,7:dw $+7,$+4,28:db 5: db #55,#55,#56,#66, #58,#88,#56,#66, #58,#88,#57,#77, #58,#88,#50,#07, #55,#55,#50,#07, #66,#67,#00,#07, #66,#67,#77,#77
 menicn_move         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#33,#36,#66, #33,#22,#23,#36, #32,#22,#22,#36, #32,#55,#55,#55, #33,#58,#88,#85, #66,#58,#88,#85, #66,#55,#55,#55
@@ -3830,15 +4105,14 @@ menicn_find         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#16,#61,#66, #61,#71,#17
 menicn_dirswap      db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#16, #17,#77,#76,#71, #18,#8f,#88,#81, #18,#f8,#8f,#81, #18,#f8,#8f,#81, #18,#88,#f8,#81, #61,#11,#11,#16
 menicn_dirsame      db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#16, #17,#77,#76,#71, #18,#99,#99,#81, #18,#88,#88,#81, #18,#99,#99,#81, #18,#88,#88,#81, #61,#11,#11,#16
 
-prgwinmentx4 db "Show",0
-prgwinmen4tx1  db 6,128,-1:dw menicn_showall     +1:db  " All Files",0
-prgwinmen4tx2  db 6,128,-1:dw menicn_null        +1:db  " xxxxxxxx",0
-prgwinmen4tx3  db 6,128,-1:dw menicn_showcustom  +1:db  " Custom...",0
-prgwinmen4tx4  db 6,128,-1:dw menicn_sortname    +1:db  " Sort By Name",0
-prgwinmen4tx5  db 6,128,-1:dw menicn_sortsize    +1:db  " Sort By Size",0
-prgwinmen4tx6  db 6,128,-1:dw menicn_datetime    +1:db  " Sort By Date",0
-prgwinmen4tx7  db 6,128,-1:dw menicn_sortreverse +1:db  " Reversed Order",0
-prgwinmen4tx8  db 6,128,-1:dw menicn_refresh     +1:db  " Reread Source",0
+prgwinmen4tx1  db 6,128,-1:dw menicn_showall     +1:db 7:dw prgwinmen4tx1_poi:db 0
+prgwinmen4tx2  db 6,128,-1:dw menicn_null        +1:db " xxxxxxxx",0
+prgwinmen4tx3  db 6,128,-1:dw menicn_showcustom  +1:db 7:dw prgwinmen4tx3_poi:db 0
+prgwinmen4tx4  db 6,128,-1:dw menicn_sortname    +1:db 7:dw prgwinmen4tx4_poi:db 0
+prgwinmen4tx5  db 6,128,-1:dw menicn_sortsize    +1:db 7:dw prgwinmen4tx5_poi:db 0
+prgwinmen4tx6  db 6,128,-1:dw menicn_datetime    +1:db 7:dw prgwinmen4tx6_poi:db 0
+prgwinmen4tx7  db 6,128,-1:dw menicn_sortreverse +1:db 7:dw prgwinmen4tx7_poi:db 0
+prgwinmen4tx8  db 6,128,-1:dw menicn_refresh     +1:db 7:dw prgwinmen4tx8_poi:db 0
 
 menicn_showall      db 4,8,7:dw $+7,$+4,28:db 5: db #66,#69,#96,#66, #99,#69,#96,#99, #99,#99,#99,#99, #66,#99,#99,#66, #69,#99,#99,#96, #99,#96,#69,#99, #99,#66,#66,#99
 menicn_showcustom   db 4,8,7:dw $+7,$+4,28:db 5: db #6f,#ff,#ff,#f6, #ff,#f6,#6f,#ff, #66,#66,#6f,#ff, #66,#6f,#ff,#f6, #66,#ff,#f6,#66, #66,#66,#66,#66, #66,#ff,#f6,#66
@@ -3848,27 +4122,19 @@ menicn_datetime     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#77,#77,#66, #67,#8a,#18
 menicn_sortreverse  db 4,8,7:dw $+7,$+4,28:db 5: db #11,#16,#66,#66, #66,#16,#66,#66, #61,#66,#67,#76, #16,#66,#76,#67, #11,#16,#77,#77, #66,#66,#76,#67, #66,#66,#76,#67
 menicn_refresh      db 4,8,7:dw $+7,$+4,28:db 5: db #00,#99,#90,#00, #09,#00,#09,#09, #00,#00,#00,#99, #99,#90,#09,#99, #99,#00,#00,#00, #90,#90,#00,#90, #00,#09,#99,#00
 
-prgwinmentx5 db "Configuration",0
-prgwinmen5tx1 db 6,128,-1:dw menicn_settings    +1:db " Options...",0
-prgwinmen5tx2 db 6,128,-1:dw menicn_filesave    +1:db " Save Settings",0
+prgwinmen5tx1 db 6,128,-1:dw menicn_settings    +1:db 7:dw prgwinmen5tx1_poi:db 0
+prgwinmen5tx2 db 6,128,-1:dw menicn_filesave    +1:db 7:dw prgwinmen5tx2_poi:db 0
 
 menicn_settings     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#6c,#66,#66, #6c,#6c,#6c,#66, #6f,#cd,#cf,#66, #cc,#c1,#cc,#c6, #ff,#cc,#cf,#f6, #6c,#fc,#fc,#66, #6f,#6c,#6f,#66
 menicn_filesave     db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#11, #1f,#ee,#ee,#f1, #1f,#ee,#ee,#f1, #1f,#ff,#ff,#f1, #1f,#11,#c1,#f1, #1f,#11,#c1,#f1, #61,#11,#11,#11
 
-prgwinmentx6 db "?",0
-prgwinmen6tx1 db 6,128,-1:dw menicn_help        +1:db " Help topics",0
-prgwinmen6tx2 db 6,128,-1:dw menicn_about       +1:db " About SymCommander...",0
+prgwinmen6tx1 db 6,128,-1:dw menicn_help        +1:db 7:dw prgwinmen6tx1_poi:db 0
+prgwinmen6tx2 db 6,128,-1:dw menicn_about       +1:db 7:dw prgwinmen6tx2_poi:db 0
 
 menicn_help         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#1f,#f1,#66, #61,#fc,#cf,#16, #1f,#ff,#fc,#f1, #ff,#fc,#cc,#f1, #ff,#ff,#ff,#18, #1f,#cf,#f1,#81, #61,#ff,#18,#16
 menicn_about        db 4,8,7:dw $+7,$+4,28:db 5: db #66,#10,#07,#66, #66,#10,#07,#66, #66,#66,#66,#66, #61,#00,#07,#66, #66,#10,#07,#66, #66,#10,#07,#66, #61,#00,#00,#76
 
 ;### Haupt-Fenster-Texte
-prgobjtxt1  db "View",0
-prgobjtxt2  db "Edit",0
-prgobjtxt3  db "Copy",0
-prgobjtxt4  db "Move",0
-prgobjtxt5  db "Folder",0
-prgobjtxt6  db "Delete",0
 prgobjtxt7  db ">",0
 lstanz1     dw 0
 prgobjtxt8  ds 50
@@ -3877,129 +4143,48 @@ prgobjtxt9  ds 50
 prgtabdev   ds 8*5
 prgobjtxta  db 0
 
-;### Dialog-Fenster-Texte
-filtyptxt   db "Enter file type (e.g. *.exe, *.txt)",0
-cmdcoptxt   db "Copy "
-cmdcoptxt1  db "??? file(s) to",0
-cmdcoptxt2  db " file(s) to",0
-cmdmovtxt   db "Move "
-cmdmovtxt1  db "??? file(s) to",0
-cmdrentxt   db "Rename file/directory to",0
-cmdfoltxt   db "New directory",0
-splitttxt1  db "Split the file to directory:",0
-splitttxt2  db "KBytes per file:",0
-combintxt   db "Combine selection to file:",0
-confrmtxt1  db "Do you really want to delete the "
-confrmtxt1a db "???",0
-confrmtxt2  db "selected file(s)/directorie(s)?",0
+drvprptxt6  db "########### KBytes",0
+drvprptxt8  db "########### KBytes",0
+drvprptxta  db "########### KBytes",0
 
-drvprptit   db "Drive information",0
-drvprptxt0  db "Drive #",0
-drvprptxt1  db "Type",0
-drvprptxt20 db "[unknown]",0
-drvprptxt2a db "Floppy Single Side",0
-drvprptxt2b db "Floppy Double Side",0
-drvprptxt2c db "IDE device",0
-drvprptxt2d db "SD/MMC card",0
-drvprptxt2e db "USB device",0
-drvprptxt3  db "File system",0
+;### Property-Fenster-Texte
+propertxt8  ds 33
+
+properdtm1  db "07.08.2005, 18:09:34",0
+properdtm2  db "07.08.2005, 18:09:34",0
+
+propertxte  db "EXE-file",0
+propertxtf  db "########### Bytes",0,0
+propertxtg  db " Bytes",0
+
+;### Dialog-Fenster-Texte
+drvprptxt2f db "HostFS",0
 drvprptxt4a db "Amsdos Data",0
 drvprptxt4b db "Amsdos System",0
 drvprptxt4c db "PCW",0
 drvprptxt4d db "FAT 12",0
 drvprptxt4e db "FAT 16",0
 drvprptxt4f db "FAT 32",0
-drvprptxt5  db "Used",0
-drvprptxt6  db "########### KBytes",0
-drvprptxt60 db "[examining...]",0
-drvprptxt61 db "[Error]",0
-drvprptxt62 db " KBytes",0
-drvprptxt7  db "Free",0
-drvprptxt8  db "########### KBytes",0
-drvprptxt9  db "Capacity",0
-drvprptxta  db "########### KBytes",0
-drvprptxtb0 db "(not removable)",0
-drvprptxtb1 db "(removable)",0
-
-;### Property-Fenster-Texte
-propertit   db "Properties",0
-propertxt0  db "Name",0
-propertxt1  db "File type",0
-propertxt2  db "Open with",0
-propertxt3  db "Location",0
-propertxt4  db "Size",0
-propertxt5  db "Created",0
-propertxt6  db "Modified",0
-propertxt7  db "Attributes",0
-propertxt8  ds 33
-
-properdtm1  db "07.08.2005, 18:09:34",0
-properdtm2  db "07.08.2005, 18:09:34",0
-
-propertxta  db "Read only",0
-propertxtb  db "Hidden",0
-propertxtc  db "System",0
-propertxtd  db "Archive",0
-
-propertxte  db "EXE-file",0
-propertxtf  db "########### Bytes",0,0
-propertxtg  db " Bytes",0
-propertxth  db "directory",0
-
-;### Attributes-Fenster-Texte
-attribtit   db "Change attributes",0
-attribtxt0  db "Date and time",0
-attribtxt1  db "Attributes",0
-attribtxt2  db "Change date/time:",0
-attribtxt3  db "set",0
-attribtxt4  db "reset",0
-attribtxt5  db "unchng.",0
-attribtxt6  db "Date:",0
-attribtxt7  db "Time:",0
-attribtxt8  db "Current",0
-
-;### Config-Fenster-Texte
-configtit   db "Configuration",0
-configtxt0  db "Memory usage",0
-configtxt1  db "Max. list entries",0
-configtxt2  db "List buffer size",0
-configtxt3  db "Copy buffer size",0
-configtxt4  db "bytes",0
-configtxt5  db "Miscellaneous",0
-configtxt6  db "files",0
-configtxt7  db "Show hidden/system files",0
-configtxt8  db "Ask before overwriting files",0
-
-;### Copy/Move-Fenster-Texte
-copmovtxt1a db "Copy:",0
-copmovtxt1b db "Move:"
-copmovtxt0  db 0
-copmovtxt2  db "From:",0
-copmovtxt3  db "To:",0
-
-;### Overwrite-Fenster-Texte
-ovtwrttxt0  db "...already exist. What to do?",0
-ovtwrttxt1  db "Overwrite",0
-ovtwrttxt2  db "Overwr.all",0
-ovtwrttxt3  db "Skip",0
-ovtwrttxt4  db "Skip all",0
+drvprptxt4g equ drvprptxt2f ;"HostFS"
 
 
 ;==============================================================================
 ;### TRANSFER-TEIL ############################################################
 ;==============================================================================
 
-prgtrnbeg
+App_BegTrns
+
 ;### PRGPRZS -> Stack für Programm-Prozess
-        ds 128
-prgstk  ds 6*2
-        dw prgprz
-prgprzn db 0
-prgmsgb ds 14
+            ds 128
+prgstk      ds 6*2
+            dw prgprz
+App_PrcID   db 0
+App_MsgBuf  ds 14
 
 ;### VERSCHIEDENES ############################################################
 
-cfgdev  ds 8*16
+cfgdev      ds 8*16
+cfghrdflg   db 0    ;Hardware flags (+1=Proportional Mouse, +2=Real-Time Clock, +4=Mass Storage Device, +8=GFX9000, +16=Longfilename, +32=255charset)
 
 ;### DIALOG INPUT FENSTER #####################################################
 
@@ -4042,17 +4227,17 @@ splittbuf   db "178",0,0,0
 
 ;### OVERWRITE FENSTER ########################################################
 
-ovrwrtwin   dw #1401,4+16,079,060,160,55,0,0,160,55,160,55,160,55,0,prgwintit,0,0,ovrwrtgrp,0,0:ds 136+14
+ovrwrtwin   dw #1401,4+16,079,060,160,71,0,0,160,71,160,71,160,71,0,prgwintit,0,0,ovrwrtgrp,0,0:ds 136+14
 ovrwrtgrp   db 8,0:dw ovrwrtdat,0,0,256*8+4,0,0,04
 ovrwrtdat
 dw      00,         0,2,         0,0,1000,1000,0        ;00=Hintergrund
 dw      00,255*256+ 1,ovrwrtdsc1, 05,03,150, 8,0        ;01=Beschreibung
 dw      00,255*256+ 1,ovrwrtdsc2, 05,13, 25, 8,0        ;02=Beschreibung
-dw cmdcov1,255*256+16,ovtwrttxt1, 05,23, 48,12,0        ;03="Overwrite"    -Button
-dw cmdcov2,255*256+16,ovtwrttxt2, 57,23, 48,12,0        ;04="Overwrite All"-Button
-dw cmdcov3,255*256+16,ovtwrttxt3, 05,39, 48,12,0        ;05="Skip"         -Button
-dw cmdcov4,255*256+16,ovtwrttxt4, 57,39, 48,12,0        ;06="Skip All"     -Button
-dw diainpc,255*256+16,prgtxtcnc, 109,39, 46,12,0        ;07="Cancel"       -Button
+dw cmdcov1,255*256+16,ovtwrttxt1, 05,23, 73,12,0        ;03="Overwrite"    -Button
+dw cmdcov2,255*256+16,ovtwrttxt2, 82,23, 73,12,0        ;04="Overwrite All"-Button
+dw cmdcov3,255*256+16,ovtwrttxt3, 05,39, 73,12,0        ;05="Skip"         -Button
+dw cmdcov4,255*256+16,ovtwrttxt4, 82,39, 73,12,0        ;06="Skip All"     -Button
+dw diainpc,255*256+16,prgtxtcnc,  82,55, 73,12,0        ;07="Cancel"       -Button
 
 ovrwrtdsc1  dw cmdpth2,2+4+128
 ovrwrtdsc2  dw ovtwrttxt0,2+4
@@ -4080,26 +4265,26 @@ copmovdst   dw copmovtxt0,2+4+128
 
 ;### DRIVE-INFO FENSTER #######################################################
 
-drvprpwin   dw #1401,4+16,079,041,160,101,0,0,160,101,160,101,160,101,0,drvprptit,0,0,drvprpgrp,0,0:ds 136+14
+drvprpwin   dw #1401,4+16,071,041,176,101,0,0,176,101,176,101,176,101,0,drvprptit,0,0,drvprpgrp,0,0:ds 136+14
 drvprpgrp   db 17,0:dw drvprpdat,0,0,256*17+17,0,0,17
 drvprpdat
 dw      00,         0,2,          0,0,1000,1000,0       ;00=Hintergrund
 dw      00,255*256+ 1,drvprpdsc0, 05, 07, 55, 8,0       ;01=Beschreibung "Drive X"
-dw      00,255*256+ 1,drvprpdscb, 61, 07, 94, 8,0       ;02=Angabe       "Removable"
-dw      00,         0,1,          05, 20,150, 1,0       ;03=Trennlinie
+dw      00,255*256+ 1,drvprpdscb, 77, 07, 94, 8,0       ;02=Angabe       "Removable"
+dw      00,         0,1,          05, 20,166, 1,0       ;03=Trennlinie
 dw      00,255*256+ 1,drvprpdsc1, 05, 24, 55, 8,0       ;04=Beschreibung "Type"
-dw      00,255*256+ 1,drvprpdsc2, 61, 24, 94, 8,0       ;05=Angabe       "Type"
+dw      00,255*256+ 1,drvprpdsc2, 77, 24, 94, 8,0       ;05=Angabe       "Type"
 dw      00,255*256+ 1,drvprpdsc3, 05, 34, 55, 8,0       ;06=Beschreibung "Filesystem"
-dw      00,255*256+ 1,drvprpdsc4, 61, 34, 94, 8,0       ;07=Angabe       "Filesystem"
-dw      00,         0,1,          05, 45,150, 1,0       ;08=Trennlinie
+dw      00,255*256+ 1,drvprpdsc4, 77, 34, 94, 8,0       ;07=Angabe       "Filesystem"
+dw      00,         0,1,          05, 45,166, 1,0       ;08=Trennlinie
 dw      00,255*256+ 1,drvprpdsc5, 05, 49, 55, 8,0       ;09=Beschreibung "Belegt"
 dw      00,255*256+ 1,drvprpdsc7, 05, 59, 55, 8,0       ;10=Beschreibung "Frei"
-dw      00,255*256+ 1,drvprpdsc6, 61, 49, 94, 8,0       ;11=Angabe       "Belegt"
-dw      00,255*256+ 1,drvprpdsc8, 61, 59, 94, 8,0       ;12=Angabe       "Frei"
+dw      00,255*256+ 1,drvprpdsc6, 77, 49, 94, 8,0       ;11=Angabe       "Belegt"
+dw      00,255*256+ 1,drvprpdsc8, 77, 59, 94, 8,0       ;12=Angabe       "Frei"
 dw      00,255*256+ 1,drvprpdsc9, 05, 69, 55, 8,0       ;13=Beschreibung "Gesamt"
-dw      00,255*256+ 1,drvprpdsca, 61, 69, 94, 8,0       ;14=Angabe       "Gesamt"
-dw      00,         0,1,          05, 80,150, 1,0       ;15=Trennlinie
-dw diainpc,255*256+16,prgtxtok,   56, 84, 48,12,0       ;16="Ok"    -Button
+dw      00,255*256+ 1,drvprpdsca, 77, 69, 94, 8,0       ;14=Angabe       "Gesamt"
+dw      00,         0,1,          05, 80,166, 1,0       ;15=Trennlinie
+dw diainpc,255*256+16,prgtxtok,   64, 84, 48,12,0       ;16="Ok"    -Button
 
 drvprpdsc0  dw drvprptxt0,2+4
 drvprpdsc1  dw drvprptxt1,2+4
@@ -4116,36 +4301,36 @@ drvprpdscb  dw drvprptxtb0,2+4
 
 ;### PROPERTY FENSTER #########################################################
 
-properwin   dw #1401,4+16,079,011,160,161,0,0,160,161,160,161,160,161,0,propertit,0,0,propergrp,0,0:ds 136+14
+properwin   dw #1401,4+16,079,011,168,161,0,0,168,161,168,161,168,161,0,propertit,0,0,propergrp,0,0:ds 136+14
 propergrp   db 27,0:dw properdat,0,0,256*27+26,0,0,3
 properdat
 dw      00,         0,2,          0,0,1000,1000,0       ;00=Hintergrund
 dw      00,255*256+ 1,properdsc0, 05, 07, 55, 8,0       ;01=Beschreibung "Name"
-dw      00,255*256+32,diainpinp,  51, 05,104,12,0       ;02=Eingabe "Name"
-dw      00,         0,1,          05, 20,150, 1,0       ;03=Trennlinie
+dw      00,255*256+32,diainpinp,  59, 05,104,12,0       ;02=Eingabe "Name"
+dw      00,         0,1,          05, 20,158, 1,0       ;03=Trennlinie
 dw      00,255*256+ 1,properdsc1, 05, 24, 55, 8,0       ;04=Beschreibung "File type"
-dw      00,255*256+ 1,propercon1, 51, 24,104, 8,0       ;05=Angabe "File type"
+dw      00,255*256+ 1,propercon1, 59, 24,104, 8,0       ;05=Angabe "File type"
 dw      00,255*256+ 1,properdsc2, 05, 34, 55, 8,0       ;06=Beschreibung "Open with"
-dw      00,255*256+ 1,properdsc8, 51, 34,104, 8,0       ;07=Beschreibung "not defined"
-dw      00,         0,1,          05, 45,150, 1,0       ;08=Trennlinie
+dw      00,255*256+ 1,properdsc8, 59, 34,104, 8,0       ;07=Beschreibung "not defined"
+dw      00,         0,1,          05, 45,158, 1,0       ;08=Trennlinie
 dw      00,255*256+ 1,properdsc3, 05, 49, 55, 8,0       ;09=Beschreibung "Location"
-dw      00,255*256+ 1,propercon3, 51, 49,104, 8,0       ;10=Angabe "Location"
+dw      00,255*256+ 1,propercon3, 59, 49,104, 8,0       ;10=Angabe "Location"
 dw      00,255*256+ 1,properdsc4, 05, 59, 55, 8,0       ;11=Beschreibung "Size"
-dw      00,255*256+ 1,propercon4, 51, 59,104, 8,0       ;12=Angabe "Size"
+dw      00,255*256+ 1,propercon4, 59, 59,104, 8,0       ;12=Angabe "Size"
 dw      00,         0,1,          05, 70,150, 1,0       ;13=Trennlinie
 dw      00,255*256+ 1,properdsc5, 05, 74, 55, 8,0       ;14=Beschreibung "Created"
-dw      00,255*256+ 1,propercon5, 51, 74,104, 8,0       ;15=Angabe "Size"
+dw      00,255*256+ 1,propercon5, 59, 74,104, 8,0       ;15=Angabe "Size"
 dw      00,255*256+ 1,properdsc6, 05, 84, 55, 8,0       ;16=Beschreibung "Modified"
-dw      00,255*256+ 1,propercon6, 51, 84,104, 8,0       ;17=Angabe "Size"
-dw      00,         0,1,          05, 95,150, 1,0       ;18=Trennlinie
+dw      00,255*256+ 1,propercon6, 59, 84,104, 8,0       ;17=Angabe "Size"
+dw      00,         0,1,          05, 95,158, 1,0       ;18=Trennlinie
 dw      00,255*256+ 1,properdsc7, 05, 99, 55, 8,0       ;19=Beschreibung "Attributes"
-dw      00,255*256+17,properchk1, 51, 99,104, 8,0       ;20=Attribut "ReadOnly"
-dw      00,255*256+17,properchk2, 51,109,104, 8,0       ;21=Attribut "Hidden"
-dw      00,255*256+17,properchk3, 51,119,104, 8,0       ;22=Attribut "System"
-dw      00,255*256+17,properchk4, 51,129,104, 8,0       ;23=Attribut "Archiv"
-dw      00,         0,1,          05,140,150, 1,0       ;24=Trennlinie
-dw filprp0,255*256+16,prgtxtok,   57,144, 48,12,0       ;25="Ok"    -Button
-dw diainpc,255*256+16,prgtxtcnc, 107,144, 48,12,0       ;26="Cancel"-Button
+dw      00,255*256+17,properchk1, 59, 99,104, 8,0       ;20=Attribut "ReadOnly"
+dw      00,255*256+17,properchk2, 59,109,104, 8,0       ;21=Attribut "Hidden"
+dw      00,255*256+17,properchk3, 59,119,104, 8,0       ;22=Attribut "System"
+dw      00,255*256+17,properchk4, 59,129,104, 8,0       ;23=Attribut "Archiv"
+dw      00,         0,1,          05,140,158, 1,0       ;24=Trennlinie
+dw filprp0,255*256+16,prgtxtok,   65,144, 48,12,0       ;25="Ok"    -Button
+dw diainpc,255*256+16,prgtxtcnc, 115,144, 48,12,0       ;26="Cancel"-Button
 
 properdsc0  dw propertxt0,2+4
 properdsc1  dw propertxt1,2+4
@@ -4174,36 +4359,36 @@ properatr4  db 0
 
 ;### ATTRIBUTES FENSTER #######################################################
 
-attribwin   dw #1401,4+16,079,035,160,114,0,0,160,114,160,114,160,114,0,attribtit,0,0,attribgrp,0,0:ds 136+14
+attribwin   dw #1401,4+16,079,035,176,114,0,0,176,114,176,114,176,114,0,attribtit,0,0,attribgrp,0,0:ds 136+14
 attribgrp   db 27,0:dw attribdat,0,0,256*27+26,0,0,00
 attribdat
 dw      00,         0,2,          0,0,1000,1000,0       ;00=Hintergrund
-dw      00,255*256+ 3,attribdsc1, 00, 01,160,56,0       ;01=Rahmen "Attribute"
+dw      00,255*256+ 3,attribdsc1, 00, 01,176,56,0       ;01=Rahmen "Attribute"
 dw      00,255*256+ 1,attribdsc3, 08, 11, 44, 8,0       ;02=Beschreibung "ReadOnly"
-dw      00,255*256+18,attribrad1a,54, 11, 24, 8,0       ;03=Attribut "ReadOnly set"
-dw      00,255*256+18,attribrad1b,78, 11, 33, 8,0       ;04=Attribut "ReadOnly reset"
-dw      00,255*256+18,attribrad1c,111,11, 43, 8,0       ;05=Attribut "ReadOnly unchanged"
+dw      00,255*256+18,attribrad1a,70, 11, 24, 8,0       ;03=Attribut "ReadOnly set"
+dw      00,255*256+18,attribrad1b,94, 11, 33, 8,0       ;04=Attribut "ReadOnly reset"
+dw      00,255*256+18,attribrad1c,127,11, 43, 8,0       ;05=Attribut "ReadOnly unchanged"
 dw      00,255*256+ 1,attribdsc4, 08, 21, 44, 8,0       ;06=Beschreibung "Hidden"
-dw      00,255*256+18,attribrad2a,54, 21, 24, 8,0       ;07=Attribut "Hidden set"
-dw      00,255*256+18,attribrad2b,78, 21, 33, 8,0       ;08=Attribut "Hidden reset"
-dw      00,255*256+18,attribrad2c,111,21, 43, 8,0       ;09=Attribut "Hidden unchanged"
+dw      00,255*256+18,attribrad2a,70, 21, 24, 8,0       ;07=Attribut "Hidden set"
+dw      00,255*256+18,attribrad2b,94, 21, 33, 8,0       ;08=Attribut "Hidden reset"
+dw      00,255*256+18,attribrad2c,127,21, 43, 8,0       ;09=Attribut "Hidden unchanged"
 dw      00,255*256+ 1,attribdsc5, 08, 31, 44, 8,0       ;10=Beschreibung "System"
-dw      00,255*256+18,attribrad3a,54, 31, 24, 8,0       ;11=Attribut "System set"
-dw      00,255*256+18,attribrad3b,78, 31, 33, 8,0       ;12=Attribut "System reset"
-dw      00,255*256+18,attribrad3c,111,31, 43, 8,0       ;13=Attribut "System unchanged"
+dw      00,255*256+18,attribrad3a,70, 31, 24, 8,0       ;11=Attribut "System set"
+dw      00,255*256+18,attribrad3b,94, 31, 33, 8,0       ;12=Attribut "System reset"
+dw      00,255*256+18,attribrad3c,127,31, 43, 8,0       ;13=Attribut "System unchanged"
 dw      00,255*256+ 1,attribdsc6, 08, 41, 44, 8,0       ;14=Beschreibung "Archive"
-dw      00,255*256+18,attribrad4a,54, 41, 24, 8,0       ;15=Attribut "Archive set"
-dw      00,255*256+18,attribrad4b,78, 41, 33, 8,0       ;16=Attribut "Archive reset"
-dw      00,255*256+18,attribrad4c,111,41, 43, 8,0       ;17=Attribut "Archive unchanged"
-dw      00,255*256+ 3,attribdsc2, 00, 56,160,42,0       ;18=Rahmen "Datum/Zeit"
+dw      00,255*256+18,attribrad4a,70, 41, 24, 8,0       ;15=Attribut "Archive set"
+dw      00,255*256+18,attribrad4b,94, 41, 33, 8,0       ;16=Attribut "Archive reset"
+dw      00,255*256+18,attribrad4c,127,41, 43, 8,0       ;17=Attribut "Archive unchanged"
+dw      00,255*256+ 3,attribdsc2, 00, 56,176,42,0       ;18=Rahmen "Datum/Zeit"
 dw      00,255*256+17,attribchk1, 08, 66, 96, 8,0       ;19=Checkbox "Zeit ändern"
-dw filatr3,255*256+16,attribtxt8,104, 64, 48,12,0       ;20="Current"-Button
+dw filatr3,255*256+16,attribtxt8,120, 64, 48,12,0       ;20="Current"-Button
 dw      00,255*256+ 1,attribdsc7 ,08, 80, 22, 8,0       ;21=Beschreibung "Datum"
-dw      00,255*256+32,attribinp1, 30, 78, 50,12,0       ;22=Eingabe "Datum"
-dw      00,255*256+ 1,attribdsc8 ,86, 80, 23, 8,0       ;23=Beschreibung "Zeit"
-dw      00,255*256+32,attribinp2,109, 78, 28,12,0       ;24=Eingabe "Zeit"
-dw filatr0,255*256+16,prgtxtok,   59, 98, 48,12,0       ;25="Ok"    -Button
-dw diainpc,255*256+16,prgtxtcnc, 109, 98, 48,12,0       ;26="Cancel"-Button
+dw      00,255*256+32,attribinp1, 38, 78, 50,12,0       ;22=Eingabe "Datum"
+dw      00,255*256+ 1,attribdsc8,102, 80, 23, 8,0       ;23=Beschreibung "Zeit"
+dw      00,255*256+32,attribinp2,134, 78, 28,12,0       ;24=Eingabe "Zeit"
+dw filatr0,255*256+16,prgtxtok,   75, 98, 48,12,0       ;25="Ok"    -Button
+dw diainpc,255*256+16,prgtxtcnc, 125, 98, 48,12,0       ;26="Cancel"-Button
 
 attribdsc1  dw attribtxt1,2+4
 attribdsc2  dw attribtxt0,2+4
@@ -4246,11 +4431,11 @@ attribrad4c dw attribrad4,attribtxt5,2+4+512,attribrad4p
 
 ;### CONFIG FENSTER ###########################################################
 
-configwin   dw #1401,4+16,079,035,160,109,0,0,160,109,160,109,160,109,0,configtit,0,0,configgrp,0,0:ds 136+14
+configwin   dw #1401,4+16,079,035,172,109,0,0,172,109,172,109,172,109,0,configtit,0,0,configgrp,0,0:ds 136+14
 configgrp   db 16,0:dw configdat,0,0,256*16+15,0,0,04
 configdat
 dw      00,         0,2,          0,0,1000,1000,0       ;00=Hintergrund
-dw      00,255*256+ 3,configdsc0, 00, 01,160,57,0       ;01=Rahmen "Memory"
+dw      00,255*256+ 3,configdsc0, 00, 01,172,57,0       ;01=Rahmen "Memory"
 dw      00,255*256+ 1,configdsc1, 08, 13, 54, 8,0       ;02=Beschreibung "Filelist entries"
 dw      00,255*256+32,configinp1, 78, 11, 34,12,0       ;03=Eingabe "Filelist entries"
 dw      00,255*256+ 1,configdsc6,114, 13, 30, 8,0       ;04=Beschreibung "files"
@@ -4260,11 +4445,11 @@ dw      00,255*256+ 1,configdsc4,114, 27, 30, 8,0       ;07=Beschreibung "bytes"
 dw      00,255*256+ 1,configdsc3, 08, 41, 54, 8,0       ;08=Beschreibung "Filecopy buffer"
 dw      00,255*256+32,configinp3, 78, 39, 34,12,0       ;09=Eingabe "Filecopy buffer"
 dw      00,255*256+ 1,configdsc4,114, 41, 30, 8,0       ;10=Beschreibung "bytes"
-dw      00,255*256+ 3,configdsc5, 00, 57,160,36,0       ;11=Rahmen "Misc"
+dw      00,255*256+ 3,configdsc5, 00, 57,172,36,0       ;11=Rahmen "Misc"
 dw      00,255*256+17,configchk1, 08, 67,144, 8,0       ;12=Checkbox "Show hidden/system files"
 dw      00,255*256+17,configchk2, 08, 77,144, 8,0       ;13=Checkbox "Ask before overwriting files"
-dw cfgset1,255*256+16,prgtxtok,   59, 93, 48,12,0       ;14="Ok"    -Button
-dw diainpc,255*256+16,prgtxtcnc, 109, 93, 48,12,0       ;15="Cancel"-Button
+dw cfgset1,255*256+16,prgtxtok,   71, 93, 48,12,0       ;14="Ok"    -Button
+dw diainpc,255*256+16,prgtxtcnc, 121, 93, 48,12,0       ;15="Cancel"-Button
 
 configdsc0  dw configtxt0,2+4
 configdsc1  dw configtxt1,2+4
@@ -4291,14 +4476,14 @@ configchk2  dw configovr,configtxt8,2+4
 prgwindat dw #3702,3,05,05,300,150,0,0,300,150,200,100,10000,10000,prgicnsml,prgwintit,0,prgwinmen,prgwingrp,0,0:ds 136+14
 
 prgwinmen  dw 6, 1+4,prgwinmentx1,prgwinmen1,0, 1+4,prgwinmentx2,prgwinmen2,0, 1+4,prgwinmentx3,prgwinmen3,0, 1+4,prgwinmentx4,prgwinmen4,0, 1+4,prgwinmentx5,prgwinmen5,0, 1+4,prgwinmentx6,prgwinmen6,0
-prgwinmen1 dw 9, 17,prgwinmen1tx1,filopn,0,  17,prgwinmen1tx2,filatr,0, 17,prgwinmen1tx3,filprp,0, 17,prgwinmen1tx4,fildrv,0, 1+8,#0000,0,0, 17,prgwinmen1tx5,filspl,0,     17,prgwinmen1tx6,filcmb,0,1+8,#0000,0,0, 17,prgwinmen1tx7,prgend,0
-prgwinmen2 dw 7, 17,prgwinmen2tx1,mrksel,0,  17,prgwinmen2tx2,mrkdes,0, 17,prgwinmen2tx3,mrkall,0, 17,prgwinmen2tx4,mrknon,0, 17,prgwinmen2tx5,mrkinv,0, 1+8,#0000,0,0,     16,prgwinmen2tx6,mrkcmp,0
-prgwinmen3 dw 11,17,prgwinmen3tx1,cmdcop,0,  17,prgwinmen3tx2,cmdmov,0, 17,prgwinmen3tx3,cmddel,0, 17,prgwinmen3tx4,cmdfol,0, 1+8,#0000,0,0, 16,prgwinmen3tx5,prgprz0,0,    16,prgwinmen3tx6,prgprz0,0, 16,prgwinmen3tx7,prgprz0,0, 1+8,#0000,0,0
-           dw    17,prgwinmen3tx8,cmdswp,0,  17,prgwinmen3tx9,cmdequ,0
-prgwinmen4 dw 10,17+2,prgwinmen4tx1,shwall,0,17,prgwinmen4tx2,shwdef,0, 17,prgwinmen4tx3,shwcst,0, 1+8,#0000,0,0
-           dw    17+2,prgwinmen4tx4,shwnam,0,17,prgwinmen4tx5,shwsiz,0, 17,prgwinmen4tx6,shwdat,0, 1+8,#0000,0,0, 17,prgwinmen4tx7,shwrev,0, 17,prgwinmen4tx8,shwref,0
-prgwinmen5 dw 2, 17,prgwinmen5tx1,cfgset,0,  17,prgwinmen5tx2,cfgsav,0
-prgwinmen6 dw 3, 17,prgwinmen6tx1,hlpopn,0, 1+8,0,0,0, 17,prgwinmen6tx2,prginf,0
+prgwinmen1 dw 9, 33,prgwinmen1tx1,filopn,0,  33,prgwinmen1tx2,filatr,0, 33,prgwinmen1tx3,filprp,0, 33,prgwinmen1tx4,fildrv,0, 1+8,#0000,0,0, 33,prgwinmen1tx5,filspl,0,     33,prgwinmen1tx6,filcmb,0,1+8,#0000,0,0, 33,prgwinmen1tx7,prgend,0
+prgwinmen2 dw 7, 33,prgwinmen2tx1,mrksel,0,  33,prgwinmen2tx2,mrkdes,0, 33,prgwinmen2tx3,mrkall,0, 33,prgwinmen2tx4,mrknon,0, 33,prgwinmen2tx5,mrkinv,0, 1+8,#0000,0,0,     32,prgwinmen2tx6,mrkcmp,0
+prgwinmen3 dw 11,33,prgwinmen3tx1,cmdcop,0,  33,prgwinmen3tx2,cmdmov,0, 33,prgwinmen3tx3,cmddel,0, 33,prgwinmen3tx4,cmdfol,0, 1+8,#0000,0,0, 32,prgwinmen3tx5,prgprz0,0,    32,prgwinmen3tx6,prgprz0,0, 32,prgwinmen3tx7,prgprz0,0, 1+8,#0000,0,0
+           dw    33,prgwinmen3tx8,cmdswp,0,  33,prgwinmen3tx9,cmdequ,0
+prgwinmen4 dw 10,33+2,prgwinmen4tx1,shwall,0,33,prgwinmen4tx2,shwdef,0, 33,prgwinmen4tx3,shwcst,0, 1+8,#0000,0,0
+           dw    33+2,prgwinmen4tx4,shwnam,0,33,prgwinmen4tx5,shwsiz,0, 33,prgwinmen4tx6,shwdat,0, 1+8,#0000,0,0, 33,prgwinmen4tx7,shwrev,0, 33,prgwinmen4tx8,shwref,0
+prgwinmen5 dw 2, 33,prgwinmen5tx1,cfgset,0,  33,prgwinmen5tx2,cfgsav,0
+prgwinmen6 dw 3, 33,prgwinmen6tx1,hlpopn,0, 1+8,0,0,0, 33,prgwinmen6tx2,prginf,0
 
 prgwingrp db 22,0:dw prgwinobj,prgwinclc,0,0,0,0,6
 prgwinobj
@@ -4379,8 +4564,3 @@ prgmsginf  dw prgmsginf1,4*1+2,prgmsginf2,4*1+2,prgmsginf3,4*1+2,0,prgicnbig,prg
 
 prgmsgerr  dw prgmsgerr1,4*1+2
 prgmsgerra dw prgmsgerr0,4*1+2,prgmsgerr0,4*1+2
-
-prgtrnend
-
-relocate_table
-relocate_end

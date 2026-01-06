@@ -1,0 +1,167 @@
+labels,ENG,DEU,NLD
+### pack0,165,3060
+prgmsgerr00,Device does not exist,Gerät existiert nicht,Apparaat bestaat niet
+prgmsgerr01,OK,OK,OK
+prgmsgerr02,Device not initialised,Gerät nicht initialisiert,Apparaat niet geïnitialiseerd
+prgmsgerr03,Media is damaged,Medium beschädigt,Medium beschadigd
+prgmsgerr04,Partition does not exist,Partition existiert nicht,Partitie bestaat niet
+prgmsgerr05,Unsupported media or partition,Nicht unterstütztes Medium/Partition,Niet ondersteund medium/partitie
+prgmsgerr06,Error while sector read/write,Fehler beim Sektor-Zugriff,Fout bij sector lezen/schrijven
+prgmsgerr07,Error while positioning,Positionierungsfehler,Fout bij positioneren
+prgmsgerr08,Abort while volume access,Abbruch beim Datenträger-Zugriff,Afgebroken bij volume-toegang
+prgmsgerr09,Unknown volume error,Unbekannter Datenträger-Fehler,Onbekende volumefout
+prgmsgerr10,No free filehandler,Kein freier Dateihandler,Geen vrije filehandler
+prgmsgerr11,Device does not exist,Laufwerk existiert nicht,Apparaat bestaat niet
+prgmsgerr12,Path does not exist,Pfad existiert nicht,Pad bestaat niet
+prgmsgerr13,File does not exist,Datei existiert nicht,Bestand bestaat niet
+prgmsgerr14,Access is forbidden,Zugriff untersagt,Toegang verboden
+prgmsgerr15,Invalid path or filename,Falscher Pfad/Dateiname,Ongeldig pad/bestandsnaam
+prgmsgerr16,Filehandler does not exist,Dateihandler existiert nicht,Filehandler bestaat niet
+prgmsgerr17,Device slot already occupied,Geräteslot bereits belegt,Apparaatslot al bezet
+prgmsgerr18,Error in file organisation,Fehler in Dateiorganisation,Fout in bestandsorganisatie
+prgmsgerr19,Invalid destination name,Ungültiger Zielname,Ongeldige doelnaam
+prgmsgerr20,File/path already exist,Pfad/Dateiname existiert bereits,Bestand/pad bestaat al
+prgmsgerr21,Wrong sub command code,Falscher Unterbefehl-Code,Verkeerde subcommandocode
+prgmsgerr22,Wrong attribute,Falsches Attribut,Verkeerd attribuut
+prgmsgerr23,Directory full,Verzeichnis voll,Map vol
+prgmsgerr24,Media full,Datenträger voll,Medium vol
+prgmsgerr25,Media is write protected,Datenträger schreibgeschützt,Medium schrijfbeveiligd
+prgmsgerr26,Device is not ready,Gerät nicht bereit,Apparaat niet gereed
+prgmsgerr27,Directory is not empty,Verzeichnis nicht leer,Map niet leeg
+prgmsgerr28,Invalid destination device,Ungültiges Zielgerät,Ongeldig doelapparaat
+prgmsgerr29,Not supported by file system,Vom Dateisystem nicht unterstützt,Niet ondersteund door bestandssysteem
+prgmsgerr30,Unsupported device,Nicht unterstütztes Gerät,Niet ondersteund apparaat
+prgmsgerr31,File is read only,Datei ist schreibgeschützt,Bestand alleen-lezen
+prgmsgerr32,Device channel is not available,Gerätekanal nicht verfügbar,Apparaatkanaal niet beschikbaar
+prgmsgerru,*Undefined Error*,*Undefinierter Fehler*,*Ongedefinieerde fout*
+prgmsgerrs,*Unknown Error*,*Unbekannter Fehler*,*Onbekende fout*
+prgtxtok,Ok,Ok,Ok
+prgtxtcnc,Cancel,Abbruch,Annuleer
+prgtxtyes,Yes,Ja,Ja
+prgtxtno,No,Nein,Nee
+prgwinmentx1,Files,Dateien,Bestanden
+prgwinmen1tx1, Open, Öffnen, Openen
+prgwinmen1tx2, Change Attributes..., Attribute ändern..., Attributen wijzigen...
+prgwinmen1tx3, Properties, Eigenschaften, Eigenschappen
+prgwinmen1tx4, Drive information, Laufwerks-Information, Schijfinfo
+prgwinmen1tx5, Split File..., Datei aufspalten..., Bestand splitsen...
+prgwinmen1tx6, Combine Files..., Dateien zusammenführen..., Bestanden samenvoegen...
+prgwinmen1tx7, Quit, Beenden, Afsluiten
+prgwinmentx2,Mark,Markieren,Markeren
+prgwinmen2tx1, Select Group..., Gruppe markieren..., Groep selecteren...
+prgwinmen2tx2, Unselect Group..., Gruppenauswahl rückgängig..., Groep deselecteren...
+prgwinmen2tx3, Select All, Alles markieren, Alles selecteren
+prgwinmen2tx4, Unselect All, Nichts markieren, Alles deselecteren
+prgwinmen2tx5, Invert Selection, Auswahl umkehren, Selectie omkeren
+prgwinmen2tx6, Compare Directories, Verzeichnisse vergleichen, Mappen vergelijken
+prgwinmentx3,Commands,Befehle,Commando's
+prgwinmen3tx1, Copy Files..., Dateien kopieren..., Bestanden kopiëren...
+prgwinmen3tx2, Move Files..., Dateien bewegen..., Bestanden verplaatsen...
+prgwinmen3tx3, Delete Files, Dateien löschen, Bestanden verwijderen
+prgwinmen3tx4, New Folder..., Neues Verzeichnis, Nieuwe map...
+prgwinmen3tx5, View File, Datei anzeigen, Bestand bekijken
+prgwinmen3tx6, Edit File, Datei bearbeiten, Bestand bewerken
+prgwinmen3tx7, Search..., Suchen..., Zoeken...
+prgwinmen3tx8, Source <-> Target, Fenster tauschen, Bron <-> Doel
+prgwinmen3tx9, Target = Source, Fenster angleichen, Doel = Bron
+prgwinmentx4,Show,Ansicht,Weergave
+prgwinmen4tx1, All Files, Alles, Alle bestanden
+prgwinmen4tx3, Custom..., Benutzerdefiniert..., Aangepast...
+prgwinmen4tx4, Sort By Name, Nach Name sortieren, Sorteren op naam
+prgwinmen4tx5, Sort By Size, Nach Größe sortieren, Sorteren op grootte
+prgwinmen4tx6, Sort By Date, Nach Datum sortieren, Sorteren op datum
+prgwinmen4tx7, Reversed Order, Absteigend sortieren, Omgekeerde volgorde
+prgwinmen4tx8, Reread Source, Quelle neu einlesen, Bron herlezen
+prgwinmentx5,Configuration,Konfigurieren,Configuratie
+prgwinmen5tx1, Options..., Einstellungen..., Opties...
+prgwinmen5tx2, Save Settings, Einstellungen speichern, Instellingen opslaan
+prgwinmentx6,?,?,?
+prgwinmen6tx1, Help topics, Index, Help
+prgwinmen6tx2, About SymCommander..., Über SymCommander, Over SymCommander...
+prgobjtxt1,View,Anzeigen,Weergave
+prgobjtxt2,Edit,Bearbeiten,Bewerken
+prgobjtxt3,Copy,Kopieren,Kopiëren
+prgobjtxt4,Move,Bewegen,Verplaats
+prgobjtxt5,Folder,Verzeichnis,Map
+prgobjtxt6,Delete,Löschen,Verwijder
+propertit,Properties,Eigenschaften,Eigenschappen
+propertxt0,Name,Name,Naam
+propertxt1,File type,Typ,Type
+propertxt2,Open with,Öffnen mit,Openen met
+propertxt3,Location,Ort,Locatie
+propertxt4,Size,Größe,Grootte
+propertxt5,Created,Angelegt,Aangemaakt
+propertxt6,Modified,Geändert,Gewijzigd
+propertxt7,Attributes,Attribute,Attributen
+propertxta,Read only,Schreibgesch.,Alleen-lezen
+propertxtb,Hidden,Versteckt,Verborgen
+propertxtc,System,System,Systeem
+propertxtd,Archive,Archive,Archief
+propertxth,directory,Verzeichnis,Map
+attribtit,Change attributes,Attribute ändern,Attributen wijzigen
+attribtxt0,Date and time,Datum und Uhrzeit,Datum en tijd
+attribtxt1,Attributes,Attribute,Attributen
+attribtxt2,Change date/time:,Datum/Zeit ändern:,Datum/tijd wijzigen:
+attribtxt3,set,an,set
+attribtxt4,reset,aus,reset
+attribtxt5,unchng.,lassen,ongew.
+attribtxt6,Date:,Datum:,Datum:
+attribtxt7,Time:,Zeit:,Tijd:
+attribtxt8,Current,Aktuell,Huidig
+configtit,Configuration,Einstellungen,Configuratie
+configtxt0,Memory usage,Speichernutzung,Geheugengebruik
+configtxt1,Max. list entries,Listeneinträge,Max. lijstitems
+configtxt2,List buffer size,Listenbuffer,Lijstbuffer
+configtxt3,Copy buffer size,Kopierbuffer,Kopieerbuffer
+configtxt4,bytes,bytes,bytes
+configtxt5,Miscellaneous,Sonstiges,Diversen
+configtxt6,files,Dateien,bestanden
+configtxt7,Show hidden/system files,zeige System/versteckte Dateien,Verborgen/systeembestanden tonen
+configtxt8,Ask before overwriting files,vor Überschreibung fragen,Vragen voor overschrijven
+copmovtxt1a,Copy:,Kopieren:,Kopiëren:
+_copmovtxt1b,Move:,Bewegen:,Verplaatsen:
+_copmovtxt0,,,
+copmovtxt2,From:,Von:,Van:
+copmovtxt3,To:,Nach:,Naar:
+ovtwrttxt0,...already exist. What to do?,...existiert bereits. ,...bestaat al. Wat doen?
+ovtwrttxt1,Overwrite,Ersetzen,Overschrijven
+ovtwrttxt2,Overwrite all,Alle ersetzen,Alles overschr.
+ovtwrttxt3,Skip,Überspringen,Overslaan
+ovtwrttxt4,Skip all,Alle überspr.,Alles overslaan
+drvprptit,Drive information,Laufwerk Information,Schijfinfo
+_drvprptxt0,Drive ,Laufwerk ,Schijf 
+drvprptxt0a,#,#,#
+drvprptxt1,Type,Typ,Type
+drvprptxt20,[unknown],[unbekannt],[onbekend]
+drvprptxt2a,Floppy Single Side,Diskette SS,Floppy SS
+drvprptxt2b,Floppy Double Side,Diskette DS,Floppy DS
+drvprptxt2c,IDE device,IDE Gerät,IDE-apparaat
+drvprptxt2d,SD/MMC card,SD/MMC Karte,SD/MMC-kaart
+drvprptxt2e,USB device,USB Gerät,USB-apparaat
+drvprptxt3,File system,Dateisystem,Bestandssysteem
+drvprptxt5,Used,Belegt,Gebruikt
+drvprptxt60,[examining...],[untersuchen...],[onderzoeken...]
+drvprptxt61,[Error],[Fehler],[Fout]
+drvprptxt62, KBytes, KBytes, Kbytes
+drvprptxt7,Free,Frei,Vrij
+drvprptxt9,Capacity,Gesamt,Capaciteit
+drvprptxtb0,(not removable),(nicht wechselbar),(niet verwijderbaar)
+drvprptxtb1,(removable),(Wechselmedium),(verwijderbaar)
+filtyptxt,"Enter file type (e.g. *.exe, *.txt)","Dateityp (z.B. *.exe, *.txt)","Bestandstype (bv. *.exe, *.txt)"
+_cmdcoptxt,Copy ,Kopiere ,Kopiëren 
+cmdcoptxt1,??? file(s) to,??? Datei(en) nach,??? bestand(en) naar
+cmdcoptxt2, file(s) to, Datei(en) nach, bestand(en) naar
+_cmdmovtxt,Move ,Bewege ,Verplaatsen 
+cmdmovtxt1,??? file(s) to, Datei(en) nach,??? bestand(en) naar
+cmdrentxt,Rename file/directory to,Umbenennen in,Bestand/map hernoemen naar
+cmdfoltxt,New directory,Neues Verzeichnis,Nieuwe map
+splitttxt1,Split the file to directory:,Datei auspalten nach:,Bestand splitsen naar map:
+splitttxt2,KBytes per file:,KB pro Datei:,KB per bestand:
+combintxt,Combine selection to file:,Zusammenfügen in Datei:,Selectie samenvoegen tot bestand:
+_confrmtxt1,Do you really want to delete the ,Sollen wirklich die ,Wilt u echt verwijderen
+confrmtxt1a,???,??? Dateien/,???
+confrmtxt2,selected file(s)/directorie(s)?,Verzeichnisse gelöscht werden?,geselecteerde bestand(en)/map(pen)?
+lsttab3a,Name,Name,Naam
+lsttab3b,Size,Größe,Grootte
+lsttab3c,Date,Datum,Datum
+_lsttab3d,-,-,-
