@@ -1,167 +1,167 @@
-labels,ENG,DEU,NLD
-### pack0,165,3060
-prgmsgerr00,Device does not exist,Gerät existiert nicht,Apparaat bestaat niet
-prgmsgerr01,OK,OK,OK
-prgmsgerr02,Device not initialised,Gerät nicht initialisiert,Apparaat niet geïnitialiseerd
-prgmsgerr03,Media is damaged,Medium beschädigt,Medium beschadigd
-prgmsgerr04,Partition does not exist,Partition existiert nicht,Partitie bestaat niet
-prgmsgerr05,Unsupported media or partition,Nicht unterstütztes Medium/Partition,Niet ondersteund medium/partitie
-prgmsgerr06,Error while sector read/write,Fehler beim Sektor-Zugriff,Fout bij sector lezen/schrijven
-prgmsgerr07,Error while positioning,Positionierungsfehler,Fout bij positioneren
-prgmsgerr08,Abort while volume access,Abbruch beim Datenträger-Zugriff,Afgebroken bij volume-toegang
-prgmsgerr09,Unknown volume error,Unbekannter Datenträger-Fehler,Onbekende volumefout
-prgmsgerr10,No free filehandler,Kein freier Dateihandler,Geen vrije filehandler
-prgmsgerr11,Device does not exist,Laufwerk existiert nicht,Apparaat bestaat niet
-prgmsgerr12,Path does not exist,Pfad existiert nicht,Pad bestaat niet
-prgmsgerr13,File does not exist,Datei existiert nicht,Bestand bestaat niet
-prgmsgerr14,Access is forbidden,Zugriff untersagt,Toegang verboden
-prgmsgerr15,Invalid path or filename,Falscher Pfad/Dateiname,Ongeldig pad/bestandsnaam
-prgmsgerr16,Filehandler does not exist,Dateihandler existiert nicht,Filehandler bestaat niet
-prgmsgerr17,Device slot already occupied,Geräteslot bereits belegt,Apparaatslot al bezet
-prgmsgerr18,Error in file organisation,Fehler in Dateiorganisation,Fout in bestandsorganisatie
-prgmsgerr19,Invalid destination name,Ungültiger Zielname,Ongeldige doelnaam
-prgmsgerr20,File/path already exist,Pfad/Dateiname existiert bereits,Bestand/pad bestaat al
-prgmsgerr21,Wrong sub command code,Falscher Unterbefehl-Code,Verkeerde subcommandocode
-prgmsgerr22,Wrong attribute,Falsches Attribut,Verkeerd attribuut
-prgmsgerr23,Directory full,Verzeichnis voll,Map vol
-prgmsgerr24,Media full,Datenträger voll,Medium vol
-prgmsgerr25,Media is write protected,Datenträger schreibgeschützt,Medium schrijfbeveiligd
-prgmsgerr26,Device is not ready,Gerät nicht bereit,Apparaat niet gereed
-prgmsgerr27,Directory is not empty,Verzeichnis nicht leer,Map niet leeg
-prgmsgerr28,Invalid destination device,Ungültiges Zielgerät,Ongeldig doelapparaat
-prgmsgerr29,Not supported by file system,Vom Dateisystem nicht unterstützt,Niet ondersteund door bestandssysteem
-prgmsgerr30,Unsupported device,Nicht unterstütztes Gerät,Niet ondersteund apparaat
-prgmsgerr31,File is read only,Datei ist schreibgeschützt,Bestand alleen-lezen
-prgmsgerr32,Device channel is not available,Gerätekanal nicht verfügbar,Apparaatkanaal niet beschikbaar
-prgmsgerru,*Undefined Error*,*Undefinierter Fehler*,*Ongedefinieerde fout*
-prgmsgerrs,*Unknown Error*,*Unbekannter Fehler*,*Onbekende fout*
-prgtxtok,Ok,Ok,Ok
-prgtxtcnc,Cancel,Abbruch,Annuleer
-prgtxtyes,Yes,Ja,Ja
-prgtxtno,No,Nein,Nee
-prgwinmentx1,Files,Dateien,Bestanden
-prgwinmen1tx1, Open, Öffnen, Openen
-prgwinmen1tx2, Change Attributes..., Attribute ändern..., Attributen wijzigen...
-prgwinmen1tx3, Properties, Eigenschaften, Eigenschappen
-prgwinmen1tx4, Drive information, Laufwerks-Information, Schijfinfo
-prgwinmen1tx5, Split File..., Datei aufspalten..., Bestand splitsen...
-prgwinmen1tx6, Combine Files..., Dateien zusammenführen..., Bestanden samenvoegen...
-prgwinmen1tx7, Quit, Beenden, Afsluiten
-prgwinmentx2,Mark,Markieren,Markeren
-prgwinmen2tx1, Select Group..., Gruppe markieren..., Groep selecteren...
-prgwinmen2tx2, Unselect Group..., Gruppenauswahl rückgängig..., Groep deselecteren...
-prgwinmen2tx3, Select All, Alles markieren, Alles selecteren
-prgwinmen2tx4, Unselect All, Nichts markieren, Alles deselecteren
-prgwinmen2tx5, Invert Selection, Auswahl umkehren, Selectie omkeren
-prgwinmen2tx6, Compare Directories, Verzeichnisse vergleichen, Mappen vergelijken
-prgwinmentx3,Commands,Befehle,Commando's
-prgwinmen3tx1, Copy Files..., Dateien kopieren..., Bestanden kopiëren...
-prgwinmen3tx2, Move Files..., Dateien bewegen..., Bestanden verplaatsen...
-prgwinmen3tx3, Delete Files, Dateien löschen, Bestanden verwijderen
-prgwinmen3tx4, New Folder..., Neues Verzeichnis, Nieuwe map...
-prgwinmen3tx5, View File, Datei anzeigen, Bestand bekijken
-prgwinmen3tx6, Edit File, Datei bearbeiten, Bestand bewerken
-prgwinmen3tx7, Search..., Suchen..., Zoeken...
-prgwinmen3tx8, Source <-> Target, Fenster tauschen, Bron <-> Doel
-prgwinmen3tx9, Target = Source, Fenster angleichen, Doel = Bron
-prgwinmentx4,Show,Ansicht,Weergave
-prgwinmen4tx1, All Files, Alles, Alle bestanden
-prgwinmen4tx3, Custom..., Benutzerdefiniert..., Aangepast...
-prgwinmen4tx4, Sort By Name, Nach Name sortieren, Sorteren op naam
-prgwinmen4tx5, Sort By Size, Nach Größe sortieren, Sorteren op grootte
-prgwinmen4tx6, Sort By Date, Nach Datum sortieren, Sorteren op datum
-prgwinmen4tx7, Reversed Order, Absteigend sortieren, Omgekeerde volgorde
-prgwinmen4tx8, Reread Source, Quelle neu einlesen, Bron herlezen
-prgwinmentx5,Configuration,Konfigurieren,Configuratie
-prgwinmen5tx1, Options..., Einstellungen..., Opties...
-prgwinmen5tx2, Save Settings, Einstellungen speichern, Instellingen opslaan
-prgwinmentx6,?,?,?
-prgwinmen6tx1, Help topics, Index, Help
-prgwinmen6tx2, About SymCommander..., Über SymCommander, Over SymCommander...
-prgobjtxt1,View,Anzeigen,Weergave
-prgobjtxt2,Edit,Bearbeiten,Bewerken
-prgobjtxt3,Copy,Kopieren,Kopiëren
-prgobjtxt4,Move,Bewegen,Verplaats
-prgobjtxt5,Folder,Verzeichnis,Map
-prgobjtxt6,Delete,Löschen,Verwijder
-propertit,Properties,Eigenschaften,Eigenschappen
-propertxt0,Name,Name,Naam
-propertxt1,File type,Typ,Type
-propertxt2,Open with,Öffnen mit,Openen met
-propertxt3,Location,Ort,Locatie
-propertxt4,Size,Größe,Grootte
-propertxt5,Created,Angelegt,Aangemaakt
-propertxt6,Modified,Geändert,Gewijzigd
-propertxt7,Attributes,Attribute,Attributen
-propertxta,Read only,Schreibgesch.,Alleen-lezen
-propertxtb,Hidden,Versteckt,Verborgen
-propertxtc,System,System,Systeem
-propertxtd,Archive,Archive,Archief
-propertxth,directory,Verzeichnis,Map
-attribtit,Change attributes,Attribute ändern,Attributen wijzigen
-attribtxt0,Date and time,Datum und Uhrzeit,Datum en tijd
-attribtxt1,Attributes,Attribute,Attributen
-attribtxt2,Change date/time:,Datum/Zeit ändern:,Datum/tijd wijzigen:
-attribtxt3,set,an,set
-attribtxt4,reset,aus,reset
-attribtxt5,unchng.,lassen,ongew.
-attribtxt6,Date:,Datum:,Datum:
-attribtxt7,Time:,Zeit:,Tijd:
-attribtxt8,Current,Aktuell,Huidig
-configtit,Configuration,Einstellungen,Configuratie
-configtxt0,Memory usage,Speichernutzung,Geheugengebruik
-configtxt1,Max. list entries,Listeneinträge,Max. lijstitems
-configtxt2,List buffer size,Listenbuffer,Lijstbuffer
-configtxt3,Copy buffer size,Kopierbuffer,Kopieerbuffer
-configtxt4,bytes,bytes,bytes
-configtxt5,Miscellaneous,Sonstiges,Diversen
-configtxt6,files,Dateien,bestanden
-configtxt7,Show hidden/system files,zeige System/versteckte Dateien,Verborgen/systeembestanden tonen
-configtxt8,Ask before overwriting files,vor Überschreibung fragen,Vragen voor overschrijven
-copmovtxt1a,Copy:,Kopieren:,Kopiëren:
-_copmovtxt1b,Move:,Bewegen:,Verplaatsen:
-_copmovtxt0,,,
-copmovtxt2,From:,Von:,Van:
-copmovtxt3,To:,Nach:,Naar:
-ovtwrttxt0,...already exist. What to do?,...existiert bereits. ,...bestaat al. Wat doen?
-ovtwrttxt1,Overwrite,Ersetzen,Overschrijven
-ovtwrttxt2,Overwrite all,Alle ersetzen,Alles overschr.
-ovtwrttxt3,Skip,Überspringen,Overslaan
-ovtwrttxt4,Skip all,Alle überspr.,Alles overslaan
-drvprptit,Drive information,Laufwerk Information,Schijfinfo
-_drvprptxt0,Drive ,Laufwerk ,Schijf 
-drvprptxt0a,#,#,#
-drvprptxt1,Type,Typ,Type
-drvprptxt20,[unknown],[unbekannt],[onbekend]
-drvprptxt2a,Floppy Single Side,Diskette SS,Floppy SS
-drvprptxt2b,Floppy Double Side,Diskette DS,Floppy DS
-drvprptxt2c,IDE device,IDE Gerät,IDE-apparaat
-drvprptxt2d,SD/MMC card,SD/MMC Karte,SD/MMC-kaart
-drvprptxt2e,USB device,USB Gerät,USB-apparaat
-drvprptxt3,File system,Dateisystem,Bestandssysteem
-drvprptxt5,Used,Belegt,Gebruikt
-drvprptxt60,[examining...],[untersuchen...],[onderzoeken...]
-drvprptxt61,[Error],[Fehler],[Fout]
-drvprptxt62, KBytes, KBytes, Kbytes
-drvprptxt7,Free,Frei,Vrij
-drvprptxt9,Capacity,Gesamt,Capaciteit
-drvprptxtb0,(not removable),(nicht wechselbar),(niet verwijderbaar)
-drvprptxtb1,(removable),(Wechselmedium),(verwijderbaar)
-filtyptxt,"Enter file type (e.g. *.exe, *.txt)","Dateityp (z.B. *.exe, *.txt)","Bestandstype (bv. *.exe, *.txt)"
-_cmdcoptxt,Copy ,Kopiere ,Kopiëren 
-cmdcoptxt1,??? file(s) to,??? Datei(en) nach,??? bestand(en) naar
-cmdcoptxt2, file(s) to, Datei(en) nach, bestand(en) naar
-_cmdmovtxt,Move ,Bewege ,Verplaatsen 
-cmdmovtxt1,??? file(s) to, Datei(en) nach,??? bestand(en) naar
-cmdrentxt,Rename file/directory to,Umbenennen in,Bestand/map hernoemen naar
-cmdfoltxt,New directory,Neues Verzeichnis,Nieuwe map
-splitttxt1,Split the file to directory:,Datei auspalten nach:,Bestand splitsen naar map:
-splitttxt2,KBytes per file:,KB pro Datei:,KB per bestand:
-combintxt,Combine selection to file:,Zusammenfügen in Datei:,Selectie samenvoegen tot bestand:
-_confrmtxt1,Do you really want to delete the ,Sollen wirklich die ,Wilt u echt verwijderen
-confrmtxt1a,???,??? Dateien/,???
-confrmtxt2,selected file(s)/directorie(s)?,Verzeichnisse gelöscht werden?,geselecteerde bestand(en)/map(pen)?
-lsttab3a,Name,Name,Naam
-lsttab3b,Size,Größe,Grootte
-lsttab3c,Date,Datum,Datum
-_lsttab3d,-,-,-
+labels,ENG,DEU,NLD,SPA,TUR,POR,ITA
+### pack0,165,3100
+prgmsgerr00,Device does not exist,Gerät existiert nicht,Apparaat bestaat niet,El dispositivo no existe,Aygıt mevcut değil,Dispositivo não existe,Dispositivo inesistente
+prgmsgerr01,OK,OK,OK,Aceptar,OK,OK,OK
+prgmsgerr02,Device not initialised,Gerät nicht initialisiert,Apparaat niet geïnitialiseerd,Dispositivo no iniciado,Aygıt başlatılmadı,Dispositivo não inicializado,Dispositivo non inizializzato
+prgmsgerr03,Media is damaged,Medium beschädigt,Medium beschadigd,Datos dañados,Medya hasar görmüş,Mídia danificada,Supporto danneggiato
+prgmsgerr04,Partition does not exist,Partition existiert nicht,Partitie bestaat niet,La partición no existe,Bölümleme mevcut değil,Partição não existe,Partizione inesistente
+prgmsgerr05,Unsupported media or partition,Nicht unterstütztes Medium/Partition,Niet ondersteund medium/partitie,Partición o medio no soportados,Desteklenmeyen medya veya bölümleme,Mídia ou partição não suportada,Supporto o partizione non supportate
+prgmsgerr06,Error while sector read/write,Fehler beim Sektor-Zugriff,Fout bij sector lezen/schrijven,Error al leer/escribir sector,Sektör okuma/yazma sırasında hata,Erro ao ler/gravar setor,Errore di lettura/scrittura del settore
+prgmsgerr07,Error while positioning,Positionierungsfehler,Fout bij positioneren,Error al posicionar,Konumlandırma sırasında hata,Erro ao posicionar,Errore di posizionamento
+prgmsgerr08,Abort while volume access,Abbruch beim Datenträger-Zugriff,Afgebroken bij volume-toegang,Abortar mientras se accede al volumen,Birime erişim sırasında iptal,Acesso ao volume abortado,Errore durante l'accesso al volume
+prgmsgerr09,Unknown volume error,Unbekannter Datenträger-Fehler,Onbekende volumefout,Error de volumen desconocido,Bilinmeyen birim hatası,Erro de volume desconhecido,Errore sconosciuto sul volume
+prgmsgerr10,No free filehandler,Kein freier Dateihandler,Geen vrije filehandler,No hay gestor de archivo libre,Boşta dosya işleyici yok,Nenhum gestor de arquivo livre,Nessun gestore di archivio libero
+prgmsgerr11,Device does not exist,Laufwerk existiert nicht,Apparaat bestaat niet,El dispositivo no existe,Aygıt mevcut değil,Dispositivo não existe,Dispositivo inesistente
+prgmsgerr12,Path does not exist,Pfad existiert nicht,Pad bestaat niet,La ruta no existe,Yol mevcut değil,Caminho não existe,Percorso inesistente
+prgmsgerr13,File does not exist,Datei existiert nicht,Bestand bestaat niet,El archivo no existe,Dosya mevcut değil,Arquivo não existe,File inesistente
+prgmsgerr14,Access is forbidden,Zugriff untersagt,Toegang verboden,Acceso no permitido,Erişim yasak,Acesso negado,Accesso negato
+prgmsgerr15,Invalid path or filename,Falscher Pfad/Dateiname,Ongeldig pad/bestandsnaam,Ruta o nombre de archivo no válido,Geçersiz yol veya dosya ismi,Caminho ou nome de arquivo inválido,Percorso o nome file invalido
+prgmsgerr16,Filehandler does not exist,Dateihandler existiert nicht,Filehandler bestaat niet,El gestor de archivo no existe,Dosya işleyici mevcut değil,Gestor de arquivo não existe,Gestore di archivio inesistente
+prgmsgerr17,Device slot already occupied,Geräteslot bereits belegt,Apparaatslot al bezet,Ranura de dispositivo ya en uso,Cihaz yuvası zaten dolu,Slot do dispositivo já ocupado,Slot del dispositivo già occupato
+prgmsgerr18,Error in file organisation,Fehler in Dateiorganisation,Fout in bestandsorganisatie,Error en la organización de archivo,Dosya organizasyonunda hata,Erro na organização do arquivo,Errore nell'organizzazione dell'archivio
+prgmsgerr19,Invalid destination name,Ungültiger Zielname,Ongeldige doelnaam,Nombre de destino no válido,Geçersiz hedef adı,Nome de destino inválido,Nome destinazione non valido
+prgmsgerr20,File/path already exist,Pfad/Dateiname existiert bereits,Bestand/pad bestaat al,Archivo/ruta ya existe,Dosya/yol zaten mevcut,Arquivo/caminho já existe,File o percorso già esistente
+prgmsgerr21,Wrong sub command code,Falscher Unterbefehl-Code,Verkeerde subcommandocode,Código de sub comando erróneo,Yanlış alt komut kodu,Código de subcomando incorreto,Codice di sub comando errato
+prgmsgerr22,Wrong attribute,Falsches Attribut,Verkeerd attribuut,Atributo erróneo,Yanlış attribute,Atributo incorreto,Attributo errato
+prgmsgerr23,Directory full,Verzeichnis voll,Map vol,Directorio lleno,Dizin dolu,Diretório cheio,Cartella piena
+prgmsgerr24,Media full,Datenträger voll,Medium vol,Medio lleno,Medya dolu,Mídia cheia,Disco pieno
+prgmsgerr25,Media is write protected,Datenträger schreibgeschützt,Medium schrijfbeveiligd,Medio protegido para escritura,Medya yazmaya karşı korumalı,Mídia protegida contra gravação,Disco protetto da scrittura
+prgmsgerr26,Device is not ready,Gerät nicht bereit,Apparaat niet gereed,El dispositivo no está listo,Aygıt hazır değil,Dispositivo não está pronto,Dispositivo non pronto
+prgmsgerr27,Directory is not empty,Verzeichnis nicht leer,Map niet leeg,El directorio no está vacío,Dizin boş değil,Diretório não está vazio,La cartella non è vuota
+prgmsgerr28,Invalid destination device,Ungültiges Zielgerät,Ongeldig doelapparaat,Dispositivo de destino no válido,Geçersiz hedef aygıt,Dispositivo de destino inválido,Destinazione dispositivo non valida
+prgmsgerr29,Not supported by file system,Vom Dateisystem nicht unterstützt,Niet ondersteund door bestandssysteem,No soportado por el sistema de archivos,Dosya sistemi tarafından desteklenmiyor,Não suportado pelo sistema de arquivos,Non supportato dal File System
+prgmsgerr30,Unsupported device,Nicht unterstütztes Gerät,Niet ondersteund apparaat,Dispositivo no soportado,Desteklenmeyen aygıt,Dispositivo não suportado,Dispositivo non supportato
+prgmsgerr31,File is read only,Datei ist schreibgeschützt,Bestand alleen-lezen,El archivo es de solo lectura,Salt okunur dosya,Arquivo somente leitura,il file è di sola lettura
+prgmsgerr32,Device channel is not available,Gerätekanal nicht verfügbar,Apparaatkanaal niet beschikbaar,Canal de dispositivo no disponible,Aygıt kanalı kullanılamıyor,Canal do dispositivo não disponível,Canale del dispositivo non disponibile
+prgmsgerru,*Undefined Error*,*Undefinierter Fehler*,*Ongedefinieerde fout*,*Error no definido*,*Tanımlanmamış Hata*,*Erro indefinido*,*Errore sconosciuto*
+prgmsgerrs,*Unknown Error*,*Unbekannter Fehler*,*Onbekende fout*,*Error desconocido*,*Bilinmeyen Hata*,*Erro desconhecido*,*Errore indefinito*
+prgtxtok,Ok,Ok,Ok,Aceptar,Ok,Ok,Ok
+prgtxtcnc,Cancel,Abbruch,Annuleer,Cancelar,İptal,Cancelar,Annulla
+prgtxtyes,Yes,Ja,Ja,Sí,Evet,Sim,Si
+prgtxtno,No,Nein,Nee,No,Hayır,Não,No
+prgwinmentx1,Files,Dateien,Bestanden,Archivos,Dosyalar,Arquivos,Files
+prgwinmen1tx1, Open, Öffnen, Openen, Abrir, Aç, Abrir, Apri
+prgwinmen1tx2, Change Attributes..., Attribute ändern..., Attributen wijzigen..., Cambiar Atributos..., Attribute değiştir…, Alterar Atributos..., Cambia attributi
+prgwinmen1tx3, Properties, Eigenschaften, Eigenschappen, Propiedades, Özellikler, Propriedades, Proprietà
+prgwinmen1tx4, Drive information, Laufwerks-Information, Schijfinfo, Información de Unidad, Sürücü bilgileri, Informações da unidade, Drive info
+prgwinmen1tx5, Split File..., Datei aufspalten..., Bestand splitsen..., Dividir Archivo..., Dosyayı Böl…, Dividir Arquivo..., Dividi file…
+prgwinmen1tx6, Combine Files..., Dateien zusammenführen..., Bestanden samenvoegen..., Combinar Archivos..., Dosyaları Birleştir…, Combinar Arquivos..., Combina file…
+prgwinmen1tx7, Quit, Beenden, Afsluiten, Cerrar, Çıkış, Sair, Esci
+prgwinmentx2,Mark,Markieren,Markeren,Marcar,İşaretle,Marcar,Segna
+prgwinmen2tx1, Select Group..., Gruppe markieren..., Groep selecteren..., Seleccionar Grupo..., Grup Seç..., Selecionar Grupo..., Seleziona gruppo…
+prgwinmen2tx2, Unselect Group..., Gruppenauswahl rückgängig..., Groep deselecteren..., Deseleccionar Grupo..., Grup Seçimini Kaldır…, Desmarcar Grupo..., Deseleziona gruppo…
+prgwinmen2tx3, Select All, Alles markieren, Alles selecteren, Seleccionar Todo, Tümünü Seç, Selecionar Tudo, Seleziona tutto
+prgwinmen2tx4, Unselect All, Nichts markieren, Alles deselecteren, Deseleccionar Todo, Tümünü Seçimi Kaldır, Desmarcar Tudo, Deseleziona tutto
+prgwinmen2tx5, Invert Selection, Auswahl umkehren, Selectie omkeren, Invertir Selección, Seçimi Tersine Çevir, Inverter Seleção, Inverti selezione
+prgwinmen2tx6, Compare Directories, Verzeichnisse vergleichen, Mappen vergelijken, Comparar Directorios, Dizinleri Karşılaştır, Comparar Diretórios, Confronta cartelle
+prgwinmentx3,Commands,Befehle,Commando's,Comandos,Komutlar,Comandos,Comandi
+prgwinmen3tx1, Copy Files..., Dateien kopieren..., Bestanden kopiëren..., Copiar Archivos..., Dosyaları Kopyala…, Copiar Arquivos..., Copia Files..
+prgwinmen3tx2, Move Files..., Dateien bewegen..., Bestanden verplaatsen..., Mover Archivos..., Dosyaları Taşı…, Mover Arquivos..., Sposta Files…
+prgwinmen3tx3, Delete Files, Dateien löschen, Bestanden verwijderen, Borrar Archivos, Dosyaları Sil, Excluir Arquivos, Elimina Files...
+prgwinmen3tx4, New Folder..., Neues Verzeichnis, Nieuwe map..., Nueva Carpeta..., Yeni Klasör…, Nova Pasta..., Nuova Cartella…
+prgwinmen3tx5, View File, Datei anzeigen, Bestand bekijken, Ver Archivo, Dosyayı Görüntüle, Visualizar Arquivo, Leggi File
+prgwinmen3tx6, Edit File, Datei bearbeiten, Bestand bewerken, Editar Archivo, Dosyayı Düzenle, Editar Arquivo, Edita File
+prgwinmen3tx7, Search..., Suchen..., Zoeken..., Buscar..., Arama..., Pesquisar..., Cerca…
+prgwinmen3tx8, Source <-> Target, Fenster tauschen, Bron <-> Doel, Origen<-> Destino, Kaynak <-> Hedef, Origem <-> Destino, Origine <-> Destinazione
+prgwinmen3tx9, Target = Source, Fenster angleichen, Doel = Bron, Destino = Origen, Hedef = Kaynak, Destino = Origem, Destinazione = Origine
+prgwinmentx4,Show,Ansicht,Weergave,Mostrar,Göster,Mostrar,Mostra
+prgwinmen4tx1, All Files, Alles, Alle bestanden, Todos, Tüm Dosyalar, Todos os Arquivos, Tutti i file
+prgwinmen4tx3, Custom..., Benutzerdefiniert..., Aangepast..., Filtrar..., Özel…, Personalizado..., Personalizza
+prgwinmen4tx4, Sort By Name, Nach Name sortieren, Sorteren op naam, Ordenar por Nombre, Ada Göre Sırala , Ordenar por Nome, Ordina per Nome
+prgwinmen4tx5, Sort By Size, Nach Größe sortieren, Sorteren op grootte, Ordenar por Tamaño, Boyuta Göre Sırala, Ordenar por Tamanho, Ordina per Dimensione
+prgwinmen4tx6, Sort By Date, Nach Datum sortieren, Sorteren op datum, Ordenar por Fecha, Tarihe Göre Sırala, Ordenar por Data, Ordina per Data
+prgwinmen4tx7, Reversed Order, Absteigend sortieren, Omgekeerde volgorde, Orden inverso, Ters Sıra, Ordem Inversa, Ordine inverso
+prgwinmen4tx8, Reread Source, Quelle neu einlesen, Bron herlezen, Recargar origen, Kaynağı Tekrar Oku, Reler Origem, Rileggi origine
+prgwinmentx5,Configuration,Konfigurieren,Configuratie,Configuración,Yapılandırma,Configuração,Configurazione
+prgwinmen5tx1, Options..., Einstellungen..., Opties..., Opciones..., Seçenekler…, Opções..., Optioni…
+prgwinmen5tx2, Save Settings, Einstellungen speichern, Instellingen opslaan, Guardar, Ayarları Kaydet, Salvar Configurações, Salva configurazione
+prgwinmentx6,?,?,?,?,?,?,?
+prgwinmen6tx1, Help topics, Index, Help, Ayuda, Yardım konuları, Tópicos de Ajuda, Aiuto
+prgwinmen6tx2, About SymCommander..., Über SymCommander, Over SymCommander..., Acerca, SymCommander Hakkında…, Sobre o SymCommander..., Info su SymCommander…
+prgobjtxt1,View,Anzeigen,Weergave,Ver,Görüntüle,Visualizar,Leggi
+prgobjtxt2,Edit,Bearbeiten,Bewerken,Editar,Düzenle,Editar,Edita
+prgobjtxt3,Copy,Kopieren,Kopiëren,Copiar,Kopyala,Copiar,Copia
+prgobjtxt4,Move,Bewegen,Verplaats,Mover,Taşı,Mover,Sposta
+prgobjtxt5,Folder,Verzeichnis,Map,Carpeta,Klasör,Pasta,Cartella
+prgobjtxt6,Delete,Löschen,Verwijder,Borrar,Sil,Excluir,Elimina
+propertit,Properties,Eigenschaften,Eigenschappen,Propiedades,Özellikler,Propriedades,Proprietà
+propertxt0,Name,Name,Naam,Nombre,Ad,Nome,Nome
+propertxt1,File type,Typ,Type,Tipo,Dosya adı,Tipo,Tipo file
+propertxt2,Open with,Öffnen mit,Openen met,Abrir con,Birlikte aç,Abrir com,Apri con
+propertxt3,Location,Ort,Locatie,Ubicación,Konum,Local,Ubicazione
+propertxt4,Size,Größe,Grootte,Tamaño,Boyut,Tamanho,Dimensione
+propertxt5,Created,Angelegt,Aangemaakt,Creado,Oluşturma,Criado,Creato
+propertxt6,Modified,Geändert,Gewijzigd,Modificado,Düzenleme,Modificado,Modificato
+propertxt7,Attributes,Attribute,Attributen,Atributos,Attribute’ler,Atributos,Attributi
+propertxta,Read only,Schreibgesch.,Alleen-lezen,Solo lectura,Salt okunur,Leitura,Sola lettura
+propertxtb,Hidden,Versteckt,Verborgen,Oculto,Gizli,Oculto,Nascosto
+propertxtc,System,System,Systeem,Sistema,Sistem,Sistema,Sistema
+propertxtd,Archive,Archive,Archief,Archivo,Arşiv,Arquivo,Archivio
+propertxth,directory,Verzeichnis,Map,directorio,dizin,diretório,Cartella
+attribtit,Change attributes,Attribute ändern,Attributen wijzigen,Cambiar atributos,Attribute’leri değiştir,Alterar atributos,Cambia attributi
+attribtxt0,Date and time,Datum und Uhrzeit,Datum en tijd,Fecha y hora,Tarih ve saat,Data e hora,Data e ora
+attribtxt1,Attributes,Attribute,Attributen,Atributos,Attribute’ler,Atributos,Attributi
+attribtxt2,Change date/time:,Datum/Zeit ändern:,Datum/tijd wijzigen:,Cambiar fecha/hora,Tarih/saat değiştir:,Alterar data/hora:,Modifica data/ora:
+attribtxt3,set,an,set,Sí ,ayarla,sim,set
+attribtxt4,reset,aus,reset,No,sıfırla,não,reset
+attribtxt5,unchng.,lassen,ongew.,Igual,izin ver,deixar,uguale
+attribtxt6,Date:,Datum:,Datum:,Fecha:,Tarih:,Data:,Data:
+attribtxt7,Time:,Zeit:,Tijd:,Hora:,Saat:,Hora:,Ora:
+attribtxt8,Current,Aktuell,Huidig,Actual,Mevcut,Atual,Attuale
+configtit,Configuration,Einstellungen,Configuratie,Configuración,Yapılandırma,Configuração,Configurazione
+configtxt0,Memory usage,Speichernutzung,Geheugengebruik,Uso de memoria,Bellek kullanımı,Uso de memória,Memoria utilizzata
+configtxt1,Max. list entries,Listeneinträge,Max. lijstitems,Máx. Entradas,Liste girişleri,Máx. entradas,Max n° voci
+configtxt2,List buffer size,Listenbuffer,Lijstbuffer,Búfer de lista,Liste boyutu,Buffer da lista,Buffer di lista
+configtxt3,Copy buffer size,Kopierbuffer,Kopieerbuffer,Búfer de copia,Kopya boyutu,Buffer de cópia,Buffer di copia
+configtxt4,bytes,bytes,bytes,bytes,bayt,bytes,bytes
+configtxt5,Miscellaneous,Sonstiges,Diversen,Varios,Çeşitli,Diversos,Varie
+configtxt6,files,Dateien,bestanden,Archivos,dosya,arquivos,files
+configtxt7,Show hidden/system files,zeige System/versteckte Dateien,Verborgen/systeembestanden tonen,Mostrar archivos ocultos/sistema,Gizli/sistem dosyalarını göster,Mostrar arquivos ocultos/sistema,Mostra files nascosti/di sistema
+configtxt8,Ask before overwriting files,vor Überschreibung fragen,Vragen voor overschrijven,Preguntar antes de sobrescribir,Dosya üzerine yazmayı onaylayın,Perguntar antes de sobrescrever,Chiedi prima di sovrascrivere
+copmovtxt1a,Copy:,Kopieren:,Kopiëren:,Copiar:,Kopyala:,Copiar:,Copia:
+_copmovtxt1b,Move:,Bewegen:,Verplaatsen:,Mover:,Taşı:,Mover:,Sposta:
+_copmovtxt0,,,,,,,
+copmovtxt2,From:,Von:,Van:,De:,Kimden:,De:,Da:
+copmovtxt3,To:,Nach:,Naar:,A:,Kime:,Para:,A:
+ovtwrttxt0,...already exist. What to do?,...existiert bereits. ,...bestaat al. Wat doen?,… ya existe. ¿Qué hacemos?,...zaten mevcut. Ne yapmak istersiniz?,...já existe. O que fazer?,…il file eiste già. Cosa fare?
+ovtwrttxt1,Overwrite,Ersetzen,Overschrijven,Sobrescribir,Üzerine yaz,Sobrescrever,Sovrascrivi
+ovtwrttxt2,Overwrite all,Alle ersetzen,Alles overschr.,Sobrescribir todo,Tümünü üzerine yaz,Sobrescrever tudo,Sovrascrivi tutti
+ovtwrttxt3,Skip,Überspringen,Overslaan,Saltar,Atla,Pular,Salta
+ovtwrttxt4,Skip all,Alle überspr.,Alles overslaan,Saltar todo,Tümünü atla,Pular tudo,Salta tutti
+drvprptit,Drive information,Laufwerk Information,Schijfinfo,Información de unidad,Sürücü bilgileri,Informações da unidade,Info sul drive
+_drvprptxt0,Drive ,Laufwerk ,Schijf ,Unidad ,Sürücü,Unidade ,Drive
+drvprptxt0a,#,#,#,#,#,#,#
+drvprptxt1,Type,Typ,Type,Tipo,Tip,Tipo,Tipo
+drvprptxt20,[unknown],[unbekannt],[onbekend],[desconocido],[bilinmiyor],[desconhecido],[sconosciuto]
+drvprptxt2a,Floppy Single Side,Diskette SS,Floppy SS,Disq.una cara,Tek Taraflı Floppy,Disquete Face Simples,Floppy SS
+drvprptxt2b,Floppy Double Side,Diskette DS,Floppy DS,Disq.dos caras,Çift Taraflı Floppy,Disquete Face Dupla,Floppy DS
+drvprptxt2c,IDE device,IDE Gerät,IDE-apparaat,IDE,IDE aygıt,Dispositivo IDE,Disco IDE
+drvprptxt2d,SD/MMC card,SD/MMC Karte,SD/MMC-kaart,SD/MMC,SD/MMC kart,Cartão SD/MMC,Scheda SD/MMC
+drvprptxt2e,USB device,USB Gerät,USB-apparaat,USB,USB aygıt,Dispositivo USB,Dispositivo USB
+drvprptxt3,File system,Dateisystem,Bestandssysteem,Sistema,Dosya sistemi,Sistema,File system
+drvprptxt5,Used,Belegt,Gebruikt,Usado,Kullanılan,Usado,Usato
+drvprptxt60,[examining...],[untersuchen...],[onderzoeken...],[examinando...],[inceleniyor...],[examinando...],[esamino…]
+drvprptxt61,[Error],[Fehler],[Fout],[Error],[Hata],[Erro],[Errore]
+drvprptxt62, KBytes, KBytes, Kbytes, Kbytes, KBayt, KBytes, KBytes
+drvprptxt7,Free,Frei,Vrij,Libre,Boş,Livre,Liberi
+drvprptxt9,Capacity,Gesamt,Capaciteit,Capacidad,Kapasite,Capacidade,Capacità
+drvprptxtb0,(not removable),(nicht wechselbar),(niet verwijderbaar),(no extraíble),(çıkarılamaz),(não removível),(non rimovibile)
+drvprptxtb1,(removable),(Wechselmedium),(verwijderbaar),(extraíble),(çıkarılabilir),(removível),(rimovibile)
+filtyptxt,"Enter file type (e.g. *.exe, *.txt)","Dateityp (z.B. *.exe, *.txt)","Bestandstype (bv. *.exe, *.txt)","Introducir tipo (p.e. *.exe, *.txt)","Dosya türünü girin (ör. *.exe, *.txt)","Tipo de arquivo (ex: *.exe, *.txt)","Indica tipo file (es: *.exe, *.txt)"
+_cmdcoptxt,Copy ,Kopiere ,Kopiëren ,Copiar ,Kopyala ,Copiar ,Copia 
+cmdcoptxt1,??? file(s) to,??? Datei(en) nach,??? bestand(en) naar,??? archivo(s) a,??? dosya(lar) şuraya,??? arquivo(s) para,??? file(s) da
+cmdcoptxt2, file(s) to, Datei(en) nach, bestand(en) naar, archivo(s) a, dosya(lar) şuraya, arquivo(s) para, file(s) da
+_cmdmovtxt,Move ,Bewege ,Verplaatsen ,Mover ,Taşı ,Mover,Sposta 
+cmdmovtxt1,??? file(s) to, Datei(en) nach,??? bestand(en) naar,??? archivo(s) a,??? dosya(lar) şuraya,??? arquivo(s) para,??? file(s) da
+cmdrentxt,Rename file/directory to,Umbenennen in,Bestand/map hernoemen naar,Renombrar archivo/directorio a,Dosya/klasörü yeniden adlandır,Renomear arquivo/diretório para,Rinomina file/cartella da
+cmdfoltxt,New directory,Neues Verzeichnis,Nieuwe map,Nuevo directorio,Yeni dizin,Novo diretório,Nuova Cartella
+splitttxt1,Split the file to directory:,Datei auspalten nach:,Bestand splitsen naar map:,Dividir el archivo al directorio:,Dosyayı dizine ayır:,Dividir arquivo para o diretório:,Dividi file nella cartella:
+splitttxt2,KBytes per file:,KB pro Datei:,KB per bestand:,KB por archivo:,KBayt/dosya:,KB por arquivo:,KBytes per file:
+combintxt,Combine selection to file:,Zusammenfügen in Datei:,Selectie samenvoegen tot bestand:,Combinar selección a archivo:,Seçimi dosyaya birleştir:,Combinar seleção em arquivo:,Combina i selezionati nel file:
+_confrmtxt1,Do you really want to delete the ,Sollen wirklich die ,Wilt u echt verwijderen ,¿Seguro que quieres borrar los ,Seçili dosya(lar)/kalasör(ler) ,Voce realmente quer apagá-los ,Vuoi davvero eliminare 
+confrmtxt1a,???,??? Dateien/,???,???,???,???,???
+confrmtxt2,selected file(s)/directorie(s)?,Verzeichnisse gelöscht werden?,geselecteerde bestand(en)/map(pen)?,archivo/directorios seleccionados?,gerçekten silmek istiyor musunuz?,arquivos/diretórios selecionados?,file/cartelle selezionati?
+lsttab3a,Name,Name,Naam,Nombre,Ad,Nome,Nome
+lsttab3b,Size,Größe,Grootte,Tamaño,Boyut,Tamanho,Dim.
+lsttab3c,Date,Datum,Datum,Fecha,Tarih,Data,Data
+_lsttab3d,-,-,-,-,-,-,-

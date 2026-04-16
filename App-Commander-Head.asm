@@ -57,7 +57,7 @@ prgmemtab   db "SymExe10"           ;SymbOS-EXE-Kennung                 POST Tab
             dw 0                    ;zusätzlicher Data-Speicher
             dw 0                    ;zusätzlicher Transfer-Speicher
             ds 26                   ;*reserviert*
-            db 0,4                  ;required OS version (4.0)
+            db 1,4                  ;required OS version (4.0)
 prgicnsml   db 2,8,8
             db #77,#00,#8f,#cc,#9f,#ff,#af,#1f,#af,#1f,#cf,#2e,#cf,#2e,#77,#cc
 prgicnbig   db 6,24,24
@@ -65,6 +65,15 @@ prgicnbig   db 6,24,24
             db #7e,#bb,#ff,#ff,#ab,#fe,#7e,#88,#00,#00,#23,#fe,#7e,#ff,#ff,#ff,#ef,#fe,#6f,#0f,#0f,#0f,#0f,#fe,#7f,#ff,#ff,#ff,#ff,#fe,#7f,#ff,#ff,#ff,#ff,#fe,#7f,#fc,#f0,#f0,#f1,#fe,#7f,#ed,#0f,#0f,#c7,#fe
             db #7f,#ed,#0f,#0f,#e7,#fe,#7f,#ed,#e0,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#e6,#0f,#e7,#fe,#7f,#ed,#00,#0f,#e7,#fe,#b7,#ed,#0f,#0f,#e7,#fc,#f0,#f0,#f0,#f0,#f0,#f0
 
+
+;*** SYSTEM MANAGER LIBRARY USAGE
+use_SySystem_PRGRUN     equ 1   ;Starts an application or opens a document
+use_SySystem_PRGEND     equ 1   ;Stops an application and frees its resources
+use_SySystem_PRGSRV     equ 0   ;Manages shared services or finds applications
+use_SySystem_SYSWRN     equ 1   ;Opens an info, warning or confirm box
+use_SySystem_SELOPN     equ 0   ;Opens the file selection dialogue
+use_SySystem_HLPOPN     equ 1   ;HLP file handling
+use_SySystem_LNGLOD     equ 1   ;Loads a text pack from a language file
 
 ;*** FILEMANAGER LIBRARY USAGE
 use_SyFile_STOTRN       equ 0   ;Reads or writes a number of sectors
@@ -91,6 +100,7 @@ use_SyFile_DIRINF       equ 1   ;Returns information about one drive
 use_SyFile_DEVDIR       equ 1   ;Reads the content of a directory (extended)
 
 READ "..\..\..\SRC-Main\Docs-Developer\symbos_lib-FileManager.asm"
+READ "..\..\..\SRC-Main\Docs-Developer\symbos_lib-SystemManager.asm"
 
 READ "App-Commander.asm"
 

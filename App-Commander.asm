@@ -8,6 +8,8 @@
 
 
 ;TODO
+;- remove MSGSND?, replace with SyDesktop library
+
 ;+ recursive copy/move/delete
 ;- Edit Verknüpfung
 ;- swap list doesn't update menu sorting flags in
@@ -49,12 +51,13 @@ prgprz  call prglng
         ld (prgbnk),a           ;Bank*16 merken
         call sysini             ;init system specific stuff
         call devini             ;vorhandene Laufwerke holen
-        call cfgini             ;Config-Pfad generieren und Config laden
+        call cfgini             ;Config-Pfad generieren, Config laden, start-in path optional übernehmen
+
         ld a,(lstakt)
         or a
         call lstswp6
         call lstini             ;Speicher für Listen reservieren und vorbereiten
-        jp c,prgend
+        jp c,prgend     ;##!!## show error message first
 
 ;call tretst
 
@@ -173,32 +176,19 @@ prgkey2 inc hl
         jp (hl)
 
 ;### PRGEND -> Programm beenden
-prgend  ld ix,(App_PrcID)
-        db #dd:ld h,PRC_ID_SYSTEM
-        ld iy,App_MsgBuf
-        ld (iy+0),MSC_SYS_PRGEND
-        ld a,(App_BegCode+prgpstnum)
-        ld (iy+1),a
-        rst #10
-prgend0 rst #30
-        jr prgend0
+prgend  ld hl,(App_BegCode+prgpstnum)
+        call SySystem_PRGEND
+prgend1 rst #30                     ;wait for death
+        jr prgend1
 
 ;### PRGINF -> Info-Fenster anzeigen
 prginf  ld hl,prgmsginf         ;*** Info-Fenster
-        ld b,1+128
+        ld b,1+128+64
         call prginf0
         jp prgprz0
-prginf0 ld (App_MsgBuf+1),hl
-        ld a,(App_BnkNum)
-        ld c,a
-        ld (App_MsgBuf+3),bc
-        ld a,MSC_SYS_SYSWRN
-        ld (App_MsgBuf),a
-        ld ix,(App_PrcID)
-        db #dd:ld h,PRC_ID_SYSTEM
-        ld iy,App_MsgBuf
-        rst #10
-        ret
+prginf0 ld de,prgwindat
+prginf1 ld a,(App_BnkNum)
+        jp SySystem_SYSWRN
 
 ;### PRGERR -> Disc-Error-Fenster anzeigen
 ;### Eingabe    CF=0 -> kein Fehler, CF=1 -> Fehler, A=Fehlercode
@@ -223,7 +213,7 @@ prgerr1 ld (prgmsgerra),hl
         pop af
         call clcdez
         ld (prgmsgerr1a),hl
-        ld b,1
+        ld b,1+64
         ld hl,prgmsgerr
         jp prginf0
 
@@ -240,94 +230,14 @@ prglng  ld hl,(App_BegCode)
         ld iyl,0                ;language-file version 0
         jp SySystem_LNGLOD
 
-SySystem_LNGLOD
-        ld (App_MsgBuf+6),a
-        ld (App_MsgBuf+7),bc
-        ld (App_MsgBuf+8),hl
-        ld (App_MsgBuf+10),ix
-        ld (App_MsgBuf+12),iy
-        ld a,(App_BnkNum)
-        ld iyh,a
-        ld c,MSC_SYS_EXTFNC
-        ld l,FNC_DXT_LNGLOD
-        call SySystem_SendMessage
-SySLLo1 call SySystem_WaitMessage
-        cp MSR_SYS_EXTFNC
-        jr nz,SySLLo1
-        ld a,(App_MsgBuf+1)
-        ret
-SySystem_SendMessage
-        ld iy,App_MsgBuf
-        ld (iy+0),c
-        ld (App_MsgBuf+1),hl
-        ld (iy+3),a
-        ld (App_MsgBuf+4),de
-        db #dd:ld h,3       ;3 is the number of the system manager process
-        ld a,(App_PrcID)
-        db #dd:ld l,a
-        rst #10
-        ret
-SySystem_WaitMessage
-        ld iy,App_MsgBuf
-SySWMs1 db #dd:ld h,3       ;3 is the number of the system manager process
-        ld a,(App_PrcID)
-        db #dd:ld l,a
-        rst #08             ;wait for a system manager message
-        db #dd:dec l
-        jr nz,SySWMs1
-        ld a,(iy+0)
-        ret
 
 
 ;==============================================================================
 ;### SUB-ROUTINEN #############################################################
 ;==============================================================================
 
-SySystem_HLPFLG db 0    ;flag, if HLP-path is valid
-SySystem_HLPPTH db "%help.exe "
-SySystem_HLPPTH1 ds 128
-SySHInX db ".HLP",0
-
-SySystem_HLPINI
-        ld hl,(App_BegCode)
-        ld de,App_BegCode
-        dec h
-        add hl,de                   ;HL = CodeEnd = Command line
-        ld de,SySystem_HLPPTH1
-        ld bc,0
-        db #dd:ld l,128
-SySHIn1 ld a,(hl)
-        or a
-        jr z,SySHIn3
-        cp " "
-        jr z,SySHIn3
-        cp "."
-        jr nz,SySHIn2
-        ld c,e
-        ld b,d
-SySHIn2 ld (de),a
-        inc hl
-        inc de
-        db #dd:dec l
-        ret z
-        jr SySHIn1
-SySHIn3 ld a,c
-        or b
-        ret z
-        ld e,c
-        ld d,b
-        ld hl,SySHInX
-        ld bc,5
-        ldir
-        ld a,1
-        ld (SySystem_HLPFLG),a
-        ret
-
-hlpopn  ld a,(SySystem_HLPFLG)
-        or a
-        jp z,prgprz0
-        ld hl,SySystem_HLPPTH
-        jp filopnb
+hlpopn  call SySystem_HLPOPN
+        jp prgprz0
 
 ;### MSGGET -> Message für Programm abholen
 ;### Ausgabe    CF=0 -> keine Message vorhanden, CF=1 -> IXH=Absender, (recmsgb)=Message, A=(recmsgb+0), IY=recmsgb
@@ -364,7 +274,7 @@ msgsnd0 ld a,(prgwin)
         ld b,a
 msgsnd2 ld c,MSC_DSK_WININH
 msgsnd  ld a,(dskprzn)
-msgsnd1 db #dd:ld h,a
+        db #dd:ld h,a
         ld a,(App_PrcID)
         db #dd:ld l,a
         ld iy,App_MsgBuf
@@ -897,13 +807,8 @@ filopn9 inc hl
         ld (hl),a
         jr filopn4
 filopn1 ld hl,cmdpth
-filopnb ld c,MSC_SYS_PRGRUN     ;*** Datei öffnen
-        ld a,(App_BnkNum)
-        ld d,a
-        ld b,l
-        ld e,h
-        ld a,PRC_ID_SYSTEM
-        call msgsnd1
+filopnb ld a,(App_BnkNum)
+        call SySystem_PRGRUN    ;*** Datei öffnen
         jp prgprz0
 
 ;### FILATR -> Erlaubt das Ändern von Attributen und Timestamps mehrerer Files gleichzeitig
@@ -2481,7 +2386,7 @@ cfgini4 ld hl,cfgnam        ;Programm-Filename mit Config-Filename ersetzen
         ld a,(App_BnkNum)
         db #dd:ld h,a
         call SyFile_FILOPN
-        ret c
+        jr c,cfgini5
         ld de,(App_BnkNum)  ;Config laden
         ld hl,cfgbeg
         ld bc,cfgend-cfgbeg
@@ -2489,7 +2394,24 @@ cfgini4 ld hl,cfgnam        ;Programm-Filename mit Config-Filename ersetzen
         call SyFile_FILINP
         pop af              ;Config-File schließen
         call SyFile_FILCLO
-        ret
+
+cfgini5 SyMacro_APPINI prgwindat,pthdev1
+        ld hl,pthdev1
+        ld a,(hl)
+        call clcucs
+        ld (hl),a
+        ld c,-2
+cfgini6 inc hl
+        inc c
+        ld a,(hl)
+        call clclcs
+        ld (hl),a
+        or a
+        jr nz,cfgini6
+        ld hl,pthlen1
+        ld (hl),c
+        ld ix,prgobjdeva
+        jp pthupd0
 
 ;### CFGSAV -> Speichert Config-Datei
 cfgsav  ld hl,(cfgpth)      ;Config-File öffnen
@@ -3450,7 +3372,28 @@ pthupd  ld b,a
         ld ix,prgobjdevb
 pthupd1 inc a               ;A=Objekt-Nummer
         push af
-        ld c,(hl)
+        call pthupd0
+        pop af
+        ld e,a
+        ld c,MSC_DSK_WININH
+        ld a,(prgwin)
+        ld b,a
+        push bc
+        push de
+        call msgsnd         ;Dropdown aktualisieren
+        pop de
+        pop bc
+        inc e:inc e
+        push bc
+        call msgsnd         ;Pfad aktualisieren
+        pop bc
+        ld a,(pthupdf)      ;Input-Pfad aktualisieren, falls notwendig
+        or a
+        ret nz
+        ld e,11
+        jp msgsnd
+;hl=pthlen1/2, ix=prgobjdeva/b -> generate pthful? from pthlen?/pthdev?/pthdir?/pthmsk?
+pthupd0 ld c,(hl)
         ld b,0              ;BC=(pthlen)
         inc c
         inc c
@@ -3485,25 +3428,7 @@ pthupd2 cp (hl)
 pthupd3 ld a,8
         sub b
         ld (ix+12),a
-        pop af
-        ld e,a
-        ld c,MSC_DSK_WININH
-        ld a,(prgwin)
-        ld b,a
-        push bc
-        push de
-        call msgsnd         ;Dropdown aktualisieren
-        pop de
-        pop bc
-        inc e:inc e
-        push bc
-        call msgsnd         ;Pfad aktualisieren
-        pop bc
-        ld a,(pthupdf)      ;Input-Pfad aktualisieren, falls notwendig
-        or a
-        ret nz
-        ld e,11
-        jp msgsnd
+        ret
 
 ;### PRGCOP -> File kopieren
 ;### Ausgabe    CF=0 -> alles ok, CF=1 -> Fehler, A=Fehlercode
@@ -4026,7 +3951,7 @@ cfgend              ;**Ende Config**
 ;==============================================================================
 
 texts_int
-read"App-Commander-Texts.asm"
+read"App-Commander-i18n.asm"
 texts_int_end
 
 list
